@@ -6,15 +6,16 @@ EXPOSE 80
 EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
 COPY "otmApi.csproj" .
 RUN dotnet restore "./otmApi.csproj"
 COPY . .
-WORKDIR "/src/."
 RUN dotnet build "otmApi.csproj" -c Release -o /app/build
 
 FROM build AS publish
+WORKDIR /app
+
 RUN dotnet publish "otmApi.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
