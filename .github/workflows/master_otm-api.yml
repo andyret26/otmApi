@@ -24,7 +24,7 @@ jobs:
         with:
           registry: https://index.docker.io/v1/
           username: andy26
-          password: ${{ secrets.Azureappservice_Containerpassword_D0194B29ABFB417E8B142E279729476B }}
+          password: ${{ secrets.AzureAppService_ContainerPassword_d0194b29abfb417e8b142e279729476b }}
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v5
@@ -47,5 +47,5 @@ jobs:
         with:
           app-name: "otm-api"
           slot-name: "production"
-          publish-profile: ${{ secrets.Azureappservice_Publishprofile_839b0cca1861445b8ab047ae50944ca9 }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_839b0cca1861445b8ab047ae50944ca9 }}
           images: "index.docker.io/andy26/oth-api:${{ github.sha }}"
