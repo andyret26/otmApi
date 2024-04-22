@@ -27,7 +27,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: index.docker.io/andy26/oth-api:${{ github.sha }}
+          tags: index.docker.io/andy26/otm-api:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -45,4 +45,4 @@ jobs:
           app-name: "osu-tm-api"
           slot-name: "production"
           publish-profile: ${{ secrets.AzureAppService_PublishProfile_839b0cca1861445b8ab047ae50944ca9 }}
-          images: "index.docker.io/andy26/oth-api:${{ github.sha }}"
+          images: "index.docker.io/andy26/otm-api:${{ github.sha }}"
