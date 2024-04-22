@@ -1,6 +1,9 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
 WORKDIR /App
 
+EXPOSE 80
+EXPOSE 443
+
 # Copy everything
 COPY . .
 # Restore as distinct layers
