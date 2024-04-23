@@ -9,6 +9,7 @@ using OmtApi.Services.HostService;
 using OtmApi.Data;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
+using OtmApi.Services.RoundService;
 using OtmApi.Services.TournamentService;
 
 DotEnv.Load();
@@ -21,6 +22,7 @@ builder.Services.AddScoped<ITourneyService, TourneyService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IOsuApiService, OsuApiService>();
 builder.Services.AddScoped<IHostService, HostService>();
+builder.Services.AddScoped<IRoundService, RoundService>();
 
 builder.Services.AddRateLimiter(_ => _
     .AddFixedWindowLimiter(policyName: "fixed", options =>

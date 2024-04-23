@@ -1,4 +1,4 @@
-namespace OtmApi.Data.Dtos.OtmDtos;
+namespace OtmApi.Data.Dtos;
 
 public class TournamentDto
 {

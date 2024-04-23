@@ -10,6 +10,7 @@ public class DataContext : DbContext
     public DbSet<Player> Players { get; set; } = null!;
     public DbSet<Staff> Staff { get; set; } = null!;
     public DbSet<Tournament> Tournaments { get; set; } = null!;
+    public DbSet<Round> Rounds { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

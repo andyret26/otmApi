@@ -4,7 +4,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OmtApi.Services.HostService;
-using OtmApi.Data.Dtos.OtmDtos;
+using OtmApi.Data.Dtos;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
 using OtmApi.Services.TournamentService;

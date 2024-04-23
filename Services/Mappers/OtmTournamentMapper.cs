@@ -1,5 +1,5 @@
 using AutoMapper;
-using OtmApi.Data.Dtos.OtmDtos;
+using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
 
 
@@ -13,5 +13,8 @@ public class OtmMapper : Profile
         CreateMap<Staff, StaffDto>();
         CreateMap<Team, TeamDto>();
         CreateMap<Round, RoundDto>();
+        CreateMap<Round, RoundWithMapsDto>();
+        CreateMap<TMap, MapDto>();
+        CreateMap<TMapSuggestion, MapSuggestionDto>();
     }
 }

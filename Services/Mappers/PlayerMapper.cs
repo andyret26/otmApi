@@ -1,5 +1,5 @@
 using AutoMapper;
-using OtmApi.Data.Dtos.OtmDtos;
+using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
 using OtmApi.Utils;
 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
-using OtmApi.Data.Dtos.OtmDtos;
+using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
