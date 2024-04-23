@@ -32,6 +32,12 @@ public class HostController(
     private readonly ITourneyService _tournamentService = tournamentService;
     private readonly IMapper _mapper = mapper;
 
+    [HttpGet("test")]
+    public ActionResult Test()
+    {
+        return Ok("Host Controller is working");
+    }
+
     [HttpPost("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
