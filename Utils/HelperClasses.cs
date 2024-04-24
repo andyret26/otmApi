@@ -75,6 +75,7 @@ public class Beatmap
 {
     public long Id { get; set; }
     public long Beatmapset_id { get; set; }
+    public string Version { get; set; } = null!;
     public decimal Difficulty_rating { get; set; }
     public int Total_length { get; set; }
     public decimal Bpm { get; set; }

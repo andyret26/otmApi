@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OtmApi.Data;
@@ -12,9 +13,11 @@ using OtmApi.Data;
 namespace otmApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240424105839_Artis_and_Version")]
+    partial class Artis_and_Version
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,7 +86,7 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TournamentId")
+                    b.Property<int?>("TournamentId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -194,6 +197,9 @@ namespace otmApi.Migrations
                     b.Property<int>("OrderNumber")
                         .HasColumnType("integer");
 
+                    b.Property<int>("RoundId")
+                        .HasColumnType("integer");
+
                     b.Property<decimal>("Sr")
                         .HasColumnType("numeric");
 
@@ -203,7 +209,9 @@ namespace otmApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Maps");
+                    b.HasIndex("RoundId");
+
+                    b.ToTable("TMap");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TMapSuggestion", b =>
@@ -214,9 +222,6 @@ namespace otmApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<decimal>("Accuracy")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("Ar")
                         .HasColumnType("numeric");
 
@@ -224,16 +229,19 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("Bpm")
-                        .HasColumnType("numeric");
+                    b.Property<int>("Bpm")
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("Cs")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("Difficulty_rating")
+                    b.Property<string>("Image")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Length")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("Image")
+                    b.Property<string>("Link")
                         .HasColumnType("text");
 
                     b.Property<string>("Mapper")
@@ -251,15 +259,17 @@ namespace otmApi.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("text");
 
+                    b.Property<decimal>("Od")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("OrderNumber")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("Total_length")
-                        .HasColumnType("numeric");
+                    b.Property<int>("RoundId")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<decimal>("Sr")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Version")
                         .IsRequired()
@@ -267,7 +277,9 @@ namespace otmApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MapSuggestions");
+                    b.HasIndex("RoundId");
+
+                    b.ToTable("TMapSuggestion");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Team", b =>
@@ -361,36 +373,6 @@ namespace otmApi.Migrations
                     b.ToTable("TournamentPlayer", (string)null);
                 });
 
-            modelBuilder.Entity("RoundTMap", b =>
-                {
-                    b.Property<int>("MappoolId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RoundsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MappoolId", "RoundsId");
-
-                    b.HasIndex("RoundsId");
-
-                    b.ToTable("RoundMap", (string)null);
-                });
-
-            modelBuilder.Entity("RoundTMapSuggestion", b =>
-                {
-                    b.Property<int>("MapSuggestionsId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RoundsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("MapSuggestionsId", "RoundsId");
-
-                    b.HasIndex("RoundsId");
-
-                    b.ToTable("RoundMapSuggestion", (string)null);
-                });
-
             modelBuilder.Entity("StaffTournament", b =>
                 {
                     b.Property<int>("StaffId")
@@ -408,13 +390,9 @@ namespace otmApi.Migrations
 
             modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
                 {
-                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
+                    b.HasOne("OtmApi.Data.Entities.Tournament", null)
                         .WithMany("Rounds")
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tournament");
+                        .HasForeignKey("TournamentId");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Stats", b =>
@@ -440,6 +418,28 @@ namespace otmApi.Migrations
                     b.Navigation("Map");
 
                     b.Navigation("Player");
+
+                    b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.TMap", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Round", "Round")
+                        .WithMany("Mappool")
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.TMapSuggestion", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Round", "Round")
+                        .WithMany("MapSuggestions")
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Round");
                 });
@@ -492,36 +492,6 @@ namespace otmApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RoundTMap", b =>
-                {
-                    b.HasOne("OtmApi.Data.Entities.TMap", null)
-                        .WithMany()
-                        .HasForeignKey("MappoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OtmApi.Data.Entities.Round", null)
-                        .WithMany()
-                        .HasForeignKey("RoundsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("RoundTMapSuggestion", b =>
-                {
-                    b.HasOne("OtmApi.Data.Entities.TMapSuggestion", null)
-                        .WithMany()
-                        .HasForeignKey("MapSuggestionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OtmApi.Data.Entities.Round", null)
-                        .WithMany()
-                        .HasForeignKey("RoundsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("StaffTournament", b =>
                 {
                     b.HasOne("OtmApi.Data.Entities.Staff", null)
@@ -545,6 +515,13 @@ namespace otmApi.Migrations
             modelBuilder.Entity("OtmApi.Data.Entities.Player", b =>
                 {
                     b.Navigation("Stats");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
+                {
+                    b.Navigation("MapSuggestions");
+
+                    b.Navigation("Mappool");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TMap", b =>

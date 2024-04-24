@@ -11,6 +11,8 @@ public class DataContext : DbContext
     public DbSet<Staff> Staff { get; set; } = null!;
     public DbSet<Tournament> Tournaments { get; set; } = null!;
     public DbSet<Round> Rounds { get; set; } = null!;
+    public DbSet<TMap> Maps { get; set; } = null!;
+    public DbSet<TMapSuggestion> MapSuggestions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,12 +42,14 @@ public class DataContext : DbContext
             .UsingEntity(j => j.ToTable("TeamPlayer"));
 
         modelBuilder.Entity<TMap>()
-            .HasOne(m => m.Round)
-            .WithMany(r => r.Mappool);
+            .HasMany(m => m.Rounds)
+            .WithMany(r => r.Mappool)
+            .UsingEntity(j => j.ToTable("RoundMap"));
 
         modelBuilder.Entity<TMapSuggestion>()
-            .HasOne(m => m.Round)
-            .WithMany(r => r.MapSuggestions);
+            .HasMany(m => m.Rounds)
+            .WithMany(r => r.MapSuggestions)
+            .UsingEntity(j => j.ToTable("RoundMapSuggestion"));
 
         base.OnModelCreating(modelBuilder);
     }
