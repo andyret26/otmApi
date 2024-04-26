@@ -56,21 +56,50 @@ public class RoundController(
     {
         try
         {
+            TMapSuggestion mapSuggestion;
+            if (await _mapService.MapSuggestionExists(request.MapId, request.Mod))
+            {
+                mapSuggestion = await _mapService.GetMapSuggestionAsync(request.MapId, request.Mod);
+            }
 
-            var map = await _osuApiService.GetBeatmapsAsync([request.MapId]);
-            if (map.IsNullOrEmpty()) return NotFound(new ErrorResponse("NotFound", 404, "Map not found"));
+            else
+            {
+                if (await _mapService.MapSuggestionExists(request.MapId, "NM"))
+                {
+                    mapSuggestion = await _mapService.GetMapSuggestionAsync(request.MapId, "NM");
 
-            // TODO if dt or hr get map attributes from https://osu.ppy.sh/docs/index.html#get-beatmap-attributes
+                }
+                else
+                {
+                    var map = await _osuApiService.GetBeatmapsAsync([request.MapId]);
+                    if (map.IsNullOrEmpty()) return NotFound(new ErrorResponse("NotFound", 404, "Map not found"));
 
-            var mapSuggestion = _mapper.Map<TMapSuggestion>(map[0]);
+                    mapSuggestion = _mapper.Map<TMapSuggestion>(map[0]);
+
+                }
+
+
+                if (mapSuggestion.Mod != request.Mod && (request.Mod == "DT" || request.Mod == "HR"))
+                {
+                    var attributes = await _osuApiService.GetBeatmapAttributesAsync(mapSuggestion.Id, request.Mod);
+                    mapSuggestion.Difficulty_rating = attributes.Star_rating;
+                    mapSuggestion.Ar = attributes.Approach_rate;
+                    mapSuggestion.Accuracy = attributes.Overall_difficulty;
+                    mapSuggestion.Bpm = request.Mod == "DT" ? (decimal)1.5 * mapSuggestion.Bpm : mapSuggestion.Bpm;
+                    mapSuggestion.Total_length = request.Mod == "DT" ? mapSuggestion.Total_length / (decimal)1.5 : mapSuggestion.Total_length;
+                    mapSuggestion.Cs = request.Mod == "HR" ? (decimal)1.3 * mapSuggestion.Cs : mapSuggestion.Cs;
+                    if (mapSuggestion.Cs > 10) mapSuggestion.Cs = 10;
+                }
+            }
             mapSuggestion.Mod = request.Mod;
             mapSuggestion.Notes = request.Notes;
 
-            var addedSuggestion = await _mapService.AddMapSuggestion(mapSuggestion);
-            var updatedRound = await _roundService.AddSuggestionToRound(roundId, addedSuggestion);
+            var suggestionToAddToRound = await _mapService.AddMapSuggestion(mapSuggestion);
+
+            await _roundService.AddSuggestionToRound(roundId, suggestionToAddToRound);
 
 
-            var returnDto = _mapper.Map<MapSuggestionDto>(addedSuggestion);
+            var returnDto = _mapper.Map<MapSuggestionDto>(suggestionToAddToRound);
             return Ok(returnDto);
         }
         catch (NotFoundException e)

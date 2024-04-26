@@ -162,3 +162,15 @@ public class MapV1
 
 }
 
+
+public class AttributeResponse
+{
+    public Attributes Attributes { get; set; } = null!;
+}
+
+public class Attributes
+{
+    public decimal Star_rating { get; set; }
+    public decimal Approach_rate { get; set; }
+    public decimal Overall_difficulty { get; set; }
+}

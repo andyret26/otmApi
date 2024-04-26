@@ -6,6 +6,7 @@ using OtmApi.Utils;
 using OtmApi.Data.Entities;
 using OtmApi.Services.Players;
 using OtmApi.Utils.Exceptions;
+using System.Text;
 
 namespace OtmApi.Services.OsuApi;
 
@@ -297,6 +298,45 @@ class OsuApiService : IOsuApiService
 
     }
 
+    public async Task<Attributes> GetBeatmapAttributesAsync(long id, string mod)
+    {
+        using HttpClient http = new();
+
+        string bearerToken = await GetToken();
+
+
+        http.DefaultRequestHeaders.Add("Accept", "application/json");
+        http.DefaultRequestHeaders.Add("Authorization", $"Bearer {bearerToken}");
+
+        var modInt = mod switch
+        {
+            "DT" => 64,
+            "HR" => 16,
+            _ => 0
+        };
+
+        var postBody = new { mods = modInt, ruleset = "osu" };
+
+        // Serialize the postBody to JSON
+        string json = JsonConvert.SerializeObject(postBody);
+
+        // Create a StringContent with the JSON data
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        // Use the StringContent as the content of the PostAsync method
+        var resp = await http.PostAsync($"https://osu.ppy.sh/api/v2/beatmaps/{id}/attributes", content);
+
+        if (resp.IsSuccessStatusCode)
+        {
+            string responseBody = await resp.Content.ReadAsStringAsync();
+            Console.WriteLine(responseBody);
+            return JsonConvert.DeserializeObject<AttributeResponse>(responseBody)!.Attributes;
+        }
+        else
+        {
+            throw new Exception($"Request failed with status code {resp.StatusCode}");
+        }
+    }
 
     public class TokenResponse
     {

@@ -16,5 +16,20 @@ public class MapService(DataContext db) : IMapService
         return addedSuggestion.Entity;
     }
 
+    public async Task<TMapSuggestion> GetMapSuggestionAsync(int mapId, string mod)
+    {
+        var ms = await _db.MapSuggestions.SingleOrDefaultAsync(s => s.Id == mapId && s.Mod == mod);
+        if (ms == null) throw new NotFoundException("MapSuggestion", mapId);
+        return ms;
+
+    }
+
+    public async Task<bool> MapSuggestionExists(int mapId, string mod)
+    {
+        return await _db.MapSuggestions.AnyAsync(s => s.Id == mapId && s.Mod == mod);
+    }
+
+
+
 
 }
