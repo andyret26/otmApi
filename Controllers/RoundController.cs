@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
@@ -57,6 +58,10 @@ public class RoundController(
         {
 
             var map = await _osuApiService.GetBeatmapsAsync([request.MapId]);
+            if (map.IsNullOrEmpty()) return NotFound(new ErrorResponse("NotFound", 404, "Map not found"));
+
+            // TODO if dt or hr get map attributes from https://osu.ppy.sh/docs/index.html#get-beatmap-attributes
+
             var mapSuggestion = _mapper.Map<TMapSuggestion>(map[0]);
             mapSuggestion.Mod = request.Mod;
             mapSuggestion.Notes = request.Notes;

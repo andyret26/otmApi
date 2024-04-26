@@ -42,6 +42,12 @@ public class DataContext : DbContext
             .UsingEntity(j => j.ToTable("TeamPlayer"));
 
         modelBuilder.Entity<TMap>()
+            .HasKey(m => new { m.Id, m.Mod });
+
+        modelBuilder.Entity<TMapSuggestion>()
+            .HasKey(m => new { m.Id, m.Mod });
+
+        modelBuilder.Entity<TMap>()
             .HasMany(m => m.Rounds)
             .WithMany(r => r.Mappool)
             .UsingEntity(j => j.ToTable("RoundMap"));
@@ -50,6 +56,9 @@ public class DataContext : DbContext
             .HasMany(m => m.Rounds)
             .WithMany(r => r.MapSuggestions)
             .UsingEntity(j => j.ToTable("RoundMapSuggestion"));
+
+
+
 
         base.OnModelCreating(modelBuilder);
     }

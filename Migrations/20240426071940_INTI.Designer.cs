@@ -13,8 +13,8 @@ using OtmApi.Data;
 namespace otmApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240424121235_RoundIdKey2")]
-    partial class RoundIdKey2
+    [Migration("20240426071940_INTI")]
+    partial class INTI
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -131,6 +131,10 @@ namespace otmApi.Migrations
                     b.Property<decimal>("Acc")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("MapMod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<List<string>>("Mods")
                         .HasColumnType("text[]");
 
@@ -143,16 +147,18 @@ namespace otmApi.Migrations
 
                     b.HasIndex("RoundId");
 
+                    b.HasIndex("MapId", "MapMod");
+
                     b.ToTable("Stats");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TMap", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Mod")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Ar")
                         .HasColumnType("numeric");
@@ -180,10 +186,6 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Mod")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -204,18 +206,18 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "Mod");
 
-                    b.ToTable("TMap");
+                    b.ToTable("Maps");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TMapSuggestion", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Mod")
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Accuracy")
                         .HasColumnType("numeric");
@@ -243,10 +245,6 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Mod")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -268,9 +266,9 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "Mod");
 
-                    b.ToTable("TMapSuggestion");
+                    b.ToTable("MapSuggestions");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Team", b =>
@@ -366,30 +364,36 @@ namespace otmApi.Migrations
 
             modelBuilder.Entity("RoundTMap", b =>
                 {
-                    b.Property<int>("MappoolId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("RoundsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("MappoolId", "RoundsId");
+                    b.Property<int>("MappoolId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("RoundsId");
+                    b.Property<string>("MappoolMod")
+                        .HasColumnType("text");
+
+                    b.HasKey("RoundsId", "MappoolId", "MappoolMod");
+
+                    b.HasIndex("MappoolId", "MappoolMod");
 
                     b.ToTable("RoundMap", (string)null);
                 });
 
             modelBuilder.Entity("RoundTMapSuggestion", b =>
                 {
-                    b.Property<int>("MapSuggestionsId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("RoundsId")
                         .HasColumnType("integer");
 
-                    b.HasKey("MapSuggestionsId", "RoundsId");
+                    b.Property<int>("MapSuggestionsId")
+                        .HasColumnType("integer");
 
-                    b.HasIndex("RoundsId");
+                    b.Property<string>("MapSuggestionsMod")
+                        .HasColumnType("text");
+
+                    b.HasKey("RoundsId", "MapSuggestionsId", "MapSuggestionsMod");
+
+                    b.HasIndex("MapSuggestionsId", "MapSuggestionsMod");
 
                     b.ToTable("RoundMapSuggestion", (string)null);
                 });
@@ -422,12 +426,6 @@ namespace otmApi.Migrations
 
             modelBuilder.Entity("OtmApi.Data.Entities.Stats", b =>
                 {
-                    b.HasOne("OtmApi.Data.Entities.TMap", "Map")
-                        .WithMany("Stats")
-                        .HasForeignKey("MapId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("OtmApi.Data.Entities.Player", "Player")
                         .WithMany("Stats")
                         .HasForeignKey("PlayerId")
@@ -437,6 +435,12 @@ namespace otmApi.Migrations
                     b.HasOne("OtmApi.Data.Entities.Round", "Round")
                         .WithMany()
                         .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OtmApi.Data.Entities.TMap", "Map")
+                        .WithMany("Stats")
+                        .HasForeignKey("MapId", "MapMod")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -497,30 +501,30 @@ namespace otmApi.Migrations
 
             modelBuilder.Entity("RoundTMap", b =>
                 {
-                    b.HasOne("OtmApi.Data.Entities.TMap", null)
-                        .WithMany()
-                        .HasForeignKey("MappoolId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("OtmApi.Data.Entities.Round", null)
                         .WithMany()
                         .HasForeignKey("RoundsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OtmApi.Data.Entities.TMap", null)
+                        .WithMany()
+                        .HasForeignKey("MappoolId", "MappoolMod")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
             modelBuilder.Entity("RoundTMapSuggestion", b =>
                 {
-                    b.HasOne("OtmApi.Data.Entities.TMapSuggestion", null)
-                        .WithMany()
-                        .HasForeignKey("MapSuggestionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("OtmApi.Data.Entities.Round", null)
                         .WithMany()
                         .HasForeignKey("RoundsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OtmApi.Data.Entities.TMapSuggestion", null)
+                        .WithMany()
+                        .HasForeignKey("MapSuggestionsId", "MapSuggestionsMod")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

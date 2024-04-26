@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace otmApi.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class INTI : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,13 +26,65 @@ namespace otmApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MapSuggestions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Mod = table.Column<string>(type: "text", nullable: false),
+                    OrderNumber = table.Column<int>(type: "integer", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Artist = table.Column<string>(type: "text", nullable: false),
+                    Version = table.Column<string>(type: "text", nullable: false),
+                    Difficulty_rating = table.Column<decimal>(type: "numeric", nullable: false),
+                    Bpm = table.Column<decimal>(type: "numeric", nullable: false),
+                    Total_length = table.Column<decimal>(type: "numeric", nullable: false),
+                    Cs = table.Column<decimal>(type: "numeric", nullable: false),
+                    Ar = table.Column<decimal>(type: "numeric", nullable: false),
+                    Accuracy = table.Column<decimal>(type: "numeric", nullable: false),
+                    Mapper = table.Column<string>(type: "text", nullable: false),
+                    Url = table.Column<string>(type: "text", nullable: false),
+                    Notes = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MapSuggestions", x => new { x.Id, x.Mod });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Maps",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Mod = table.Column<string>(type: "text", nullable: false),
+                    OrderNumber = table.Column<int>(type: "integer", nullable: false),
+                    Image = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Artist = table.Column<string>(type: "text", nullable: false),
+                    Version = table.Column<string>(type: "text", nullable: false),
+                    Sr = table.Column<decimal>(type: "numeric", nullable: false),
+                    Bpm = table.Column<int>(type: "integer", nullable: false),
+                    Length = table.Column<decimal>(type: "numeric", nullable: false),
+                    Cs = table.Column<decimal>(type: "numeric", nullable: false),
+                    Ar = table.Column<decimal>(type: "numeric", nullable: false),
+                    Od = table.Column<decimal>(type: "numeric", nullable: false),
+                    Mapper = table.Column<string>(type: "text", nullable: false),
+                    Notes = table.Column<string>(type: "text", nullable: true),
+                    Link = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Maps", x => new { x.Id, x.Mod });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Players",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Username = table.Column<string>(type: "text", nullable: false),
-                    DiscordTag = table.Column<string>(type: "text", nullable: true),
+                    DiscordUsername = table.Column<string>(type: "text", nullable: true),
                     Avatar_url = table.Column<string>(type: "text", nullable: false),
                     Global_rank = table.Column<int>(type: "integer", nullable: false),
                     Country_code = table.Column<string>(type: "text", nullable: false)
@@ -82,22 +134,23 @@ namespace otmApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Round",
+                name: "Rounds",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    TournamentId = table.Column<int>(type: "integer", nullable: true)
+                    TournamentId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Round", x => x.Id);
+                    table.PrimaryKey("PK_Rounds", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Round_Tournaments_TournamentId",
+                        name: "FK_Rounds_Tournaments_TournamentId",
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -168,65 +221,86 @@ namespace otmApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TMap",
+                name: "RoundMap",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    OrderNumber = table.Column<int>(type: "integer", nullable: false),
-                    Image = table.Column<string>(type: "text", nullable: true),
-                    Mod = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Sr = table.Column<decimal>(type: "numeric", nullable: false),
-                    Bpm = table.Column<int>(type: "integer", nullable: false),
-                    Length = table.Column<decimal>(type: "numeric", nullable: false),
-                    Cs = table.Column<decimal>(type: "numeric", nullable: false),
-                    Ar = table.Column<decimal>(type: "numeric", nullable: false),
-                    Od = table.Column<decimal>(type: "numeric", nullable: false),
-                    Mapper = table.Column<string>(type: "text", nullable: false),
-                    Notes = table.Column<string>(type: "text", nullable: true),
-                    Link = table.Column<string>(type: "text", nullable: true),
-                    RoundId = table.Column<int>(type: "integer", nullable: false)
+                    RoundsId = table.Column<int>(type: "integer", nullable: false),
+                    MappoolId = table.Column<int>(type: "integer", nullable: false),
+                    MappoolMod = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TMap", x => x.Id);
+                    table.PrimaryKey("PK_RoundMap", x => new { x.RoundsId, x.MappoolId, x.MappoolMod });
                     table.ForeignKey(
-                        name: "FK_TMap_Round_RoundId",
-                        column: x => x.RoundId,
-                        principalTable: "Round",
+                        name: "FK_RoundMap_Maps_MappoolId_MappoolMod",
+                        columns: x => new { x.MappoolId, x.MappoolMod },
+                        principalTable: "Maps",
+                        principalColumns: new[] { "Id", "Mod" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoundMap_Rounds_RoundsId",
+                        column: x => x.RoundsId,
+                        principalTable: "Rounds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TMapSuggestion",
+                name: "RoundMapSuggestion",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    OrderNumber = table.Column<int>(type: "integer", nullable: false),
-                    Image = table.Column<string>(type: "text", nullable: true),
-                    Mod = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    Sr = table.Column<decimal>(type: "numeric", nullable: false),
-                    Bpm = table.Column<int>(type: "integer", nullable: false),
-                    Length = table.Column<decimal>(type: "numeric", nullable: false),
-                    Cs = table.Column<decimal>(type: "numeric", nullable: false),
-                    Ar = table.Column<decimal>(type: "numeric", nullable: false),
-                    Od = table.Column<decimal>(type: "numeric", nullable: false),
-                    Mapper = table.Column<string>(type: "text", nullable: false),
-                    Notes = table.Column<string>(type: "text", nullable: true),
-                    Link = table.Column<string>(type: "text", nullable: true),
-                    RoundId = table.Column<int>(type: "integer", nullable: false)
+                    RoundsId = table.Column<int>(type: "integer", nullable: false),
+                    MapSuggestionsId = table.Column<int>(type: "integer", nullable: false),
+                    MapSuggestionsMod = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TMapSuggestion", x => x.Id);
+                    table.PrimaryKey("PK_RoundMapSuggestion", x => new { x.RoundsId, x.MapSuggestionsId, x.MapSuggestionsMod });
                     table.ForeignKey(
-                        name: "FK_TMapSuggestion_Round_RoundId",
+                        name: "FK_RoundMapSuggestion_MapSuggestions_MapSuggestionsId_MapSugge~",
+                        columns: x => new { x.MapSuggestionsId, x.MapSuggestionsMod },
+                        principalTable: "MapSuggestions",
+                        principalColumns: new[] { "Id", "Mod" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoundMapSuggestion_Rounds_RoundsId",
+                        column: x => x.RoundsId,
+                        principalTable: "Rounds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Stats",
+                columns: table => new
+                {
+                    MapId = table.Column<int>(type: "integer", nullable: false),
+                    PlayerId = table.Column<int>(type: "integer", nullable: false),
+                    RoundId = table.Column<int>(type: "integer", nullable: false),
+                    MapMod = table.Column<string>(type: "text", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    Acc = table.Column<decimal>(type: "numeric", nullable: false),
+                    Mods = table.Column<List<string>>(type: "text[]", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Stats", x => new { x.MapId, x.PlayerId, x.RoundId });
+                    table.ForeignKey(
+                        name: "FK_Stats_Maps_MapId_MapMod",
+                        columns: x => new { x.MapId, x.MapMod },
+                        principalTable: "Maps",
+                        principalColumns: new[] { "Id", "Mod" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Stats_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Stats_Rounds_RoundId",
                         column: x => x.RoundId,
-                        principalTable: "Round",
+                        principalTable: "Rounds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -255,44 +329,25 @@ namespace otmApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Stats",
-                columns: table => new
-                {
-                    MapId = table.Column<int>(type: "integer", nullable: false),
-                    PlayerId = table.Column<int>(type: "integer", nullable: false),
-                    RoundId = table.Column<int>(type: "integer", nullable: false),
-                    Score = table.Column<int>(type: "integer", nullable: false),
-                    Acc = table.Column<decimal>(type: "numeric", nullable: false),
-                    Mods = table.Column<List<string>>(type: "text[]", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Stats", x => new { x.MapId, x.PlayerId, x.RoundId });
-                    table.ForeignKey(
-                        name: "FK_Stats_Players_PlayerId",
-                        column: x => x.PlayerId,
-                        principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stats_Round_RoundId",
-                        column: x => x.RoundId,
-                        principalTable: "Round",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stats_TMap_MapId",
-                        column: x => x.MapId,
-                        principalTable: "TMap",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_RoundMap_MappoolId_MappoolMod",
+                table: "RoundMap",
+                columns: new[] { "MappoolId", "MappoolMod" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Round_TournamentId",
-                table: "Round",
+                name: "IX_RoundMapSuggestion_MapSuggestionsId_MapSuggestionsMod",
+                table: "RoundMapSuggestion",
+                columns: new[] { "MapSuggestionsId", "MapSuggestionsMod" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rounds_TournamentId",
+                table: "Rounds",
                 column: "TournamentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stats_MapId_MapMod",
+                table: "Stats",
+                columns: new[] { "MapId", "MapMod" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Stats_PlayerId",
@@ -302,16 +357,6 @@ namespace otmApi.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Stats_RoundId",
                 table: "Stats",
-                column: "RoundId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TMap_RoundId",
-                table: "TMap",
-                column: "RoundId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TMapSuggestion_RoundId",
-                table: "TMapSuggestion",
                 column: "RoundId");
 
             migrationBuilder.CreateIndex(
@@ -344,10 +389,13 @@ namespace otmApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Stats");
+                name: "RoundMap");
 
             migrationBuilder.DropTable(
-                name: "TMapSuggestion");
+                name: "RoundMapSuggestion");
+
+            migrationBuilder.DropTable(
+                name: "Stats");
 
             migrationBuilder.DropTable(
                 name: "TeamPlayer");
@@ -359,7 +407,13 @@ namespace otmApi.Migrations
                 name: "TournamentStaff");
 
             migrationBuilder.DropTable(
-                name: "TMap");
+                name: "MapSuggestions");
+
+            migrationBuilder.DropTable(
+                name: "Maps");
+
+            migrationBuilder.DropTable(
+                name: "Rounds");
 
             migrationBuilder.DropTable(
                 name: "Team");
@@ -369,9 +423,6 @@ namespace otmApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Staff");
-
-            migrationBuilder.DropTable(
-                name: "Round");
 
             migrationBuilder.DropTable(
                 name: "Tournaments");
