@@ -28,4 +28,12 @@ public interface ITourneyService
     /// <param name="playerIds">List of player ids to check</param>
     /// <returns>List of player ids that has a team</returns>
     public Task<List<int>> PlayerExistsInTeamTournamentAsync(int tournamentId, List<int> playerIds);
+
+    /// <summary>
+    /// Check if a staff exists in a tournament
+    /// </summary>
+    /// <param name="tournamentId"></param>
+    /// <param name="staffId"></param>
+    /// <returns></returns>
+    public Task<bool> StaffsInTourneyAsync(int tournamentId, int staffId);
 }

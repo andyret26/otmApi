@@ -114,4 +114,12 @@ public class TourneyService(DataContext db) : ITourneyService
         if (tournament.Players == null) return false;
         return tournament.Players!.Any(p => p.Id == osuId);
     }
+
+    public async Task<bool> StaffsInTourneyAsync(int tournamentId, int staffId)
+    {
+        var tournament = await _db.Tournaments.Include(t => t.Staff).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (tournament == null) throw new NotFoundException("Tournament", tournamentId);
+        if (tournament.Staff == null) return false;
+        return tournament.Staff.Any(s => s.Id == staffId);
+    }
 }
