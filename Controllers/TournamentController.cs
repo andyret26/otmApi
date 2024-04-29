@@ -30,6 +30,15 @@ public class TournamentController(
     private readonly IOsuApiService _osuApiService = osuApiService;
     private readonly IPlayerService _playerService = playerService;
 
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TournamentDto>))]
+    public async Task<ActionResult<List<TournamentDto>>> GetAllTournaments()
+    {
+        var tournaments = await _tourneyService.GetAsync();
+        var dtosToReturn = _mapper.Map<List<TournamentDto>>(tournaments);
+        return Ok(dtosToReturn);
+    }
+
 
     [HttpPost]
     [Authorize]

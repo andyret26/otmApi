@@ -21,9 +21,9 @@ public class TourneyService(DataContext db) : ITourneyService
         throw new NotImplementedException();
     }
 
-    public Task<List<Tournament>> GetAsync()
+    public async Task<List<Tournament>> GetAsync()
     {
-        throw new NotImplementedException();
+        return await _db.Tournaments.OrderByDescending(t => t.Id).ToListAsync();
     }
 
     public async Task<Tournament?> GetByIdAsync(int id)
