@@ -126,6 +126,25 @@ public class RoundController(
 
     }
 
+    [HttpPost("{roundId}/mappool/")]
+    public async Task<ActionResult<MapDto>> AddSuggestionToPool(string roundId, [FromBody] PostSuggestionDto request)
+    {
+        try
+        {
+            var map = await _roundService.AddSuggestionToPoolAsync(int.Parse(roundId), request.MapId, request.Mod);
+            return Ok(_mapper.Map<MapDto>(map));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("NotFound", 404, e.Message));
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
+
     private static void AttributeCalculate(TMapSuggestion mapSuggestion, Attributes attributes, string mod)
     {
         mapSuggestion.Difficulty_rating = attributes.Star_rating;

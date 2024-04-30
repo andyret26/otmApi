@@ -46,7 +46,7 @@ public class TourneyService(DataContext db) : ITourneyService
     public async Task<List<Tournament>> GetAllByHostIdAsync(int hostId)
     {
         if (!await _db.Hosts.AnyAsync((h) => h.Id == hostId)) throw new NotFoundException("Host", hostId);
-        return await _db.Tournaments.Where(t => t.HostId == hostId).ToListAsync();
+        return await _db.Tournaments.Where(t => t.HostId == hostId).OrderByDescending(t => t.Id).ToListAsync();
 
     }
 

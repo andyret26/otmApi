@@ -17,6 +17,9 @@ public class OtmMapper : Profile
         CreateMap<Round, RoundWithMapsDto>();
         CreateMap<TMap, MapDto>();
         CreateMap<TMapSuggestion, MapSuggestionDto>();
+        CreateMap<TMap, TMapSuggestion>();
+        CreateMap<TMapSuggestion, TMap>();
+
 
         CreateMap<Beatmap, TMap>()
             .ForMember(m => m.Artist, opt => opt.MapFrom(b => b.Beatmapset.Artist))
