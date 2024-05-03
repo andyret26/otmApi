@@ -200,7 +200,8 @@ public class TournamentController(
 
         var round = new Round
         {
-            Name = roundPostDto.Name
+            Name = roundPostDto.Name,
+            IsQualifier = roundPostDto.IsQualifier
         };
 
         var addedRound = await _tourneyService.AddRoundAsync(tournamentId, round);

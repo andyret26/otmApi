@@ -7,6 +7,7 @@ public class Round
     [Key]
     public int Id { get; set; }
     public string Name { get; set; } = null!;
+    public bool IsQualifier { get; set; } = false;
     public List<TMap>? Mappool { get; set; }
     public List<TMapSuggestion>? MapSuggestions { get; set; }
     public int TournamentId { get; set; }
