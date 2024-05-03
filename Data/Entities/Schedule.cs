@@ -14,3 +14,13 @@ public class Schedule
     public Player? Player1 { get; set; }
     public Player? Player2 { get; set; }
 }
+public class QualsSchedule
+{
+    [Key]
+    public int Id { get; set; }
+    public int RoundId { get; set; }
+    public Round Round { get; set; } = null!;
+    public DateTime DateTime { get; set; }
+    public List<Team>? Teams { get; set; }
+    public List<Player>? Players { get; set; }
+}

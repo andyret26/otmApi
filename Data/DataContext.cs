@@ -13,6 +13,8 @@ public class DataContext : DbContext
     public DbSet<Round> Rounds { get; set; } = null!;
     public DbSet<TMap> Maps { get; set; } = null!;
     public DbSet<TMapSuggestion> MapSuggestions { get; set; } = null!;
+    public DbSet<Schedule> Schedules { get; set; } = null!;
+    public DbSet<QualsSchedule> QualsSchedules { get; set; } = null!;
 
     public DbSet<TournamentPlayer> TournamentPlayer { get; set; } = null!;
 
