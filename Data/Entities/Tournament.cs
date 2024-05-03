@@ -15,7 +15,7 @@ public class Tournament
 
 
     public List<Round>? Rounds { get; set; }
-    public List<Player>? Players { get; set; }
+    public List<TournamentPlayer>? Players { get; set; }
     public List<Team>? Teams { get; set; }
     public List<Staff>? Staff { get; set; }
 
@@ -28,4 +28,16 @@ public class Team
     public int Id { get; set; }
     public string TeamName { get; set; } = null!;
     public List<Player>? Players { get; set; }
+    public bool Isknockout { get; set; }
+}
+
+
+public class TournamentPlayer
+{
+    public int PlayerId { get; set; }
+    public Player Player { get; set; } = null!;
+    public int TournamentId { get; set; }
+    public Tournament Tournament { get; set; } = null!;
+
+    public bool Isknockout { get; set; } = false;
 }

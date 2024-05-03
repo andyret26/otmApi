@@ -14,6 +14,8 @@ public class DataContext : DbContext
     public DbSet<TMap> Maps { get; set; } = null!;
     public DbSet<TMapSuggestion> MapSuggestions { get; set; } = null!;
 
+    public DbSet<TournamentPlayer> TournamentPlayer { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Stats>()
@@ -31,10 +33,8 @@ public class DataContext : DbContext
             .WithMany(s => s.Tournaments)
             .UsingEntity(j => j.ToTable("TournamentStaff"));
 
-        modelBuilder.Entity<Tournament>()
-            .HasMany(t => t.Players)
-            .WithMany(p => p.Tournaments)
-            .UsingEntity(j => j.ToTable("TournamentPlayer"));
+        modelBuilder.Entity<TournamentPlayer>()
+            .HasKey(tp => new { tp.PlayerId, tp.TournamentId });
 
         modelBuilder.Entity<Team>()
             .HasMany(t => t.Players)

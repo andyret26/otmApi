@@ -7,7 +7,7 @@ public class Player
     public string Avatar_url { get; set; } = null!;
     public int Global_rank { get; set; }
     public string Country_code { get; set; } = null!;
-    public List<Tournament>? Tournaments { get; set; }
+    public List<TournamentPlayer>? Tournaments { get; set; }
     public List<Team>? Teams { get; set; }
     public List<Stats>? Stats { get; set; }
 
