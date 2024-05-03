@@ -44,6 +44,7 @@ public class RoundDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = null!;
+    public bool IsQualifier { get; set; }
 }
 
 public class RoundPostDto
