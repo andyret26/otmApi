@@ -13,6 +13,10 @@ namespace OtmApi.Services.Mappers
                 .ForMember(player => player.Global_rank, opt => opt.MapFrom(PRD => PRD.Statistics_rulesets.Osu.Global_rank));
             CreateMap<Player, PlayerDto>();
             CreateMap<Player, OtmDashboardPlayerDto>();
+            CreateMap<TournamentPlayer, TournamentPlayerDto>();
+            CreateMap<TournamentPlayerDto, TournamentPlayer>();
+            CreateMap<TournamentPlayer, OtmDashboardPlayerDto>();
+
         }
     }
 }

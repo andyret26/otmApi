@@ -18,4 +18,12 @@ public interface IHostService
     /// <returns>True if host exists, otherwise returns false</returns>
     Task<bool> ExistsAsync(int id);
 
+    /// <summary>
+    /// Check if a osuId is hosting or co-hosting a tournament
+    /// </summary>
+    /// <param name="hostId"></param>
+    /// <param name="tournamentId"></param>
+    /// <returns></returns>
+    Task<bool> HostsTournamentAsync(int hostId, int tournamentId);
+
 }

@@ -19,6 +19,9 @@ public class OtmMapper : Profile
         CreateMap<TMapSuggestion, MapSuggestionDto>();
         CreateMap<TMap, TMapSuggestion>();
         CreateMap<TMapSuggestion, TMap>();
+        CreateMap<QualsSchedule, QualsScheduleDto>();
+        CreateMap<Tournament, TournamentSimpleDto>();
+        CreateMap<TournamentSimpleDto, Tournament>();
 
 
         CreateMap<Beatmap, TMap>()

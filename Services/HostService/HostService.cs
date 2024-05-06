@@ -43,4 +43,10 @@ public class HostService : IHostService
     {
         return await _db.Hosts.AnyAsync(h => h.Id == id);
     }
+
+    public async Task<bool> HostsTournamentAsync(int osuId, int tournamentId)
+    {
+        if (await _db.Tournaments.AnyAsync(t => t.Id == tournamentId && t.HostId == osuId)) return true;
+        return await _db.Tournaments.Include(t => t.Staff).AnyAsync(t => t.Id == tournamentId && t.Staff!.Any(s => s.Id == osuId && s.Roles.Contains("host")));
+    }
 }

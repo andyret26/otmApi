@@ -11,9 +11,19 @@ public class TournamentDto
     public string RankRange { get; set; } = null!;
 
     public List<RoundDto>? Rounds { get; set; }
-    public List<OtmDashboardPlayerDto>? Players { get; set; }
+    public List<TournamentPlayerDto>? Players { get; set; }
     public List<TeamDto>? Teams { get; set; }
     public List<StaffDto>? Staff { get; set; }
+}
+public class TournamentSimpleDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string? FormuPostLink { get; set; }
+    public bool IsTeamTourney { get; set; }
+    public string Format { get; set; } = null!;
+    public int MaxTeamSize { get; set; }
+    public string RankRange { get; set; } = null!;
 }
 
 public class StaffDto
@@ -28,6 +38,11 @@ public class TeamDto
     public int Id { get; set; }
     public string TeamName { get; set; } = null!;
     public List<OtmDashboardPlayerDto>? Players { get; set; }
+}
+public class TeamWithoutPlayerDto
+{
+    public int Id { get; set; }
+    public string TeamName { get; set; } = null!;
 }
 
 public class OtmDashboardPlayerDto
@@ -51,4 +66,14 @@ public class RoundPostDto
 {
     public string Name { get; set; } = null!;
     public bool IsQualifier { get; set; }
+}
+
+public class TournamentPlayerDto
+{
+    public int PlayerId { get; set; }
+    public PlayerDto Player { get; set; } = null!;
+    public int TournamentId { get; set; }
+    public TournamentSimpleDto Tournament { get; set; } = null!;
+
+    public bool Isknockout { get; set; } = false;
 }

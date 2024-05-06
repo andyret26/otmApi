@@ -145,6 +145,7 @@ public class RoundController(
         }
     }
 
+
     private static void AttributeCalculate(TMapSuggestion mapSuggestion, Attributes attributes, string mod)
     {
         mapSuggestion.Difficulty_rating = attributes.Star_rating;

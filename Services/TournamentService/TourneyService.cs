@@ -30,7 +30,7 @@ public class TourneyService(DataContext db) : ITourneyService
     {
         var t = await _db.Tournaments
             .Include(t => t.Teams!).ThenInclude(team => team.Players)
-            .Include(t => t.Players)
+            .Include(t => t.Players!).ThenInclude(p => p.Player)
             .Include(t => t.Rounds)
             .Include(t => t.Staff)
             .FirstOrDefaultAsync(t => t.Id == id);
