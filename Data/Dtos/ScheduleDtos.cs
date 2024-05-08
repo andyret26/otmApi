@@ -15,4 +15,7 @@ public class QualsScheduleDto
     public DateTime DateTime { get; set; }
     public List<TeamWithoutPlayerDto>? Teams { get; set; }
     public List<PlayerDto>? Players { get; set; }
+
+    public StaffDto? Referee { get; set; }
+    public string Num { get; set; } = null!;
 }

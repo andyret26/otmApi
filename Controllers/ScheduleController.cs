@@ -2,12 +2,13 @@ using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OmtApi.Services.HostService;
+using OtmApi.Services.HostService;
 using OtmApi.Data.Dtos;
 using OtmApi.Services.ScheduleService;
-using OtmApi.Services.TournamentService;
 using OtmApi.Utils;
 using OtmApi.Utils.Exceptions;
+using OtmApi.Services.StaffService;
+using OtmApi.Services.TournamentService;
 
 namespace OtmApi.Controllers;
 
@@ -15,12 +16,16 @@ namespace OtmApi.Controllers;
 public class ScheduleController(
     IScheduleService scheduleService,
     IMapper mapper,
-    IHostService hostService
+    IHostService hostService,
+    IStaffService staffService,
+    ITourneyService tourneyService
     ) : ControllerBase
 {
     private readonly IScheduleService _scheduleService = scheduleService;
     private readonly IMapper _mapper = mapper;
     private readonly IHostService _hostService = hostService;
+    private readonly IStaffService _staffService = staffService;
+    private readonly ITourneyService _tourneyService = tourneyService;
 
     [HttpPost("generate-qualifier")]
     [Authorize]
@@ -59,5 +64,33 @@ public class ScheduleController(
         {
             return NotFound(new ErrorResponse("Not Found", 404, e.Message));
         }
+    }
+
+    [HttpPost("tournament/{tournamentId}/qualifier/{sheduleId}/referee")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(StaffDto))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<StaffDto>> SetRefereeAsync(int tournamentId, int sheduleId)
+    {
+        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
+        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+        try
+        {
+            var staff = await _staffService.GetByIdAsync(osuId, tournamentId);
+            if (!await _tourneyService.StaffsInTourneyAsync(tournamentId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
+            if (!staff.Roles.Contains("referee")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee role"));
+
+            var addedRef = await _scheduleService.SetQualsRefereeAsync(sheduleId, osuId);
+
+
+            return Ok(_mapper.Map<StaffDto>(addedRef));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+
     }
 }

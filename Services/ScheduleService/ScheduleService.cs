@@ -25,13 +25,16 @@ public class ScheduleService(DataContext db) : IScheduleService
         var numberOfDays = (endDate - startDate).Days + 1;
 
         List<QualsSchedule> qualsScheduleList = [];
-        for (int i = 0; i <= numberOfDays * 24; i += 2)
+        var c = 1;
+        for (int i = 0; i < numberOfDays * 24; i += 2)
         {
             qualsScheduleList.Add(new QualsSchedule
             {
                 DateTime = startUtc.AddHours(i),
                 Round = r,
+                Num = c.ToString()
             });
+            c++;
         }
 
         await _db.QualsSchedules.AddRangeAsync(qualsScheduleList);
@@ -49,6 +52,23 @@ public class ScheduleService(DataContext db) : IScheduleService
     public async Task<List<QualsSchedule>> GetQualsScheduleAsync(int roundId)
     {
         if (!await _db.Rounds.AnyAsync(r => r.Id == roundId)) throw new NotFoundException("Round", roundId);
-        return await _db.QualsSchedules.Include(qs => qs.Teams).Include(qs => qs.Players).Where(qs => qs.RoundId == roundId).ToListAsync();
+        return await _db.QualsSchedules.Include(qs => qs.Teams).Include(qs => qs.Players).Where(qs => qs.RoundId == roundId).Include(qs => qs.Referee).ToListAsync();
+    }
+
+    public async Task<Staff> SetQualsRefereeAsync(int scheduleId, int refId)
+    {
+        var qs = await _db.QualsSchedules.SingleOrDefaultAsync(qs => qs.Id == scheduleId);
+        if (qs == null) throw new NotFoundException("Quals Schedule", scheduleId);
+        var referee = await _db.Staff.SingleOrDefaultAsync(s => s.Id == refId);
+        if (referee == null) throw new NotFoundException("Referee", refId);
+
+        qs.Referee = referee;
+        await _db.SaveChangesAsync();
+        return referee;
+    }
+
+    public Task<Staff> SetRefereeAsync(int scheduleId, int refereeId)
+    {
+        throw new NotImplementedException();
     }
 }

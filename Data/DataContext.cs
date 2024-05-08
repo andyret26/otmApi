@@ -23,6 +23,9 @@ public class DataContext : DbContext
         modelBuilder.Entity<Stats>()
             .HasKey(s => new { s.MapId, s.PlayerId, s.RoundId });
 
+        modelBuilder.Entity<Staff>()
+            .HasKey(s => new { s.Id, s.TournamentId });
+
         modelBuilder.Entity<Host>()
             .HasMany(h => h.Tournaments)
             .WithOne(t => t.Host)
@@ -32,8 +35,8 @@ public class DataContext : DbContext
 
         modelBuilder.Entity<Tournament>()
             .HasMany(t => t.Staff)
-            .WithMany(s => s.Tournaments)
-            .UsingEntity(j => j.ToTable("TournamentStaff"));
+            .WithOne(s => s.Tournament);
+
 
         modelBuilder.Entity<TournamentPlayer>()
             .HasKey(tp => new { tp.PlayerId, tp.TournamentId });

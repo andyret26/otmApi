@@ -5,13 +5,14 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using OmtApi.Services.HostService;
 using OtmApi.Data;
+using OtmApi.Services.HostService;
 using OtmApi.Services.MapService;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
 using OtmApi.Services.RoundService;
 using OtmApi.Services.ScheduleService;
+using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
 
 DotEnv.Load();
@@ -27,6 +28,7 @@ builder.Services.AddScoped<IHostService, HostService>();
 builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
 
 builder.Services.AddRateLimiter(_ => _
     .AddFixedWindowLimiter(policyName: "fixed", options =>

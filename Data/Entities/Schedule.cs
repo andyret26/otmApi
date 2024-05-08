@@ -23,4 +23,7 @@ public class QualsSchedule
     public DateTime DateTime { get; set; }
     public List<Team>? Teams { get; set; }
     public List<Player>? Players { get; set; }
+
+    public Staff? Referee { get; set; }
+    public string Num { get; set; } = null!;
 }

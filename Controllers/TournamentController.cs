@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
+using OtmApi.Services.HostService;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
+using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
 using OtmApi.Utils;
 using OtmApi.Utils.Exceptions;
@@ -22,13 +24,17 @@ public class TournamentController(
     IMapper mapper,
     ITourneyService tourneyService,
     IOsuApiService osuApiService,
-    IPlayerService playerService
+    IPlayerService playerService,
+    IStaffService staffService,
+    IHostService hostService
         ) : ControllerBase
 {
     private readonly IMapper _mapper = mapper;
     private readonly ITourneyService _tourneyService = tourneyService;
     private readonly IOsuApiService _osuApiService = osuApiService;
     private readonly IPlayerService _playerService = playerService;
+    private readonly IStaffService _staffService = staffService;
+    private readonly IHostService _hostService = hostService;
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TournamentDto>))]
@@ -55,6 +61,18 @@ public class TournamentController(
 
             var addedTourney = await _tourneyService.AddAsync(tToAdd);
             var dtoToReturn = _mapper.Map<TournamentDto>(addedTourney);
+
+            // add host to staff with all roles
+            var host = await _hostService.GetByIdAsync(addedTourney.HostId);
+            var staff = new Staff
+            {
+                Id = host.Id,
+                Username = addedTourney.Host.Username,
+                Tournament = addedTourney,
+                Roles = new List<string> { "host", "referee", "streamer", "commentator", "mappooler" }
+
+            };
+            await _staffService.AddAsync(staff);
 
             return CreatedAtAction("GetTournament", new { id = addedTourney.Id }, dtoToReturn);
         }
@@ -206,6 +224,53 @@ public class TournamentController(
 
         var addedRound = await _tourneyService.AddRoundAsync(tournamentId, round);
         return Ok(_mapper.Map<RoundDto>(addedRound));
+    }
+
+    [HttpGet("{id}/player-min")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PlayerMinDto>))]
+    public async Task<ActionResult<List<PlayerMinDto>>> GetPlayersMin(int id)
+    {
+        try
+        {
+            var players = await _tourneyService.GetAllPlayersAsync(id);
+            return Ok(_mapper.Map<List<PlayerMinDto>>(players));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
+
+    [HttpGet("{id}/team-min")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TeamWithoutPlayerDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<TeamWithoutPlayerDto>>> GetTeamsMin(int id)
+    {
+        try
+        {
+            var teams = await _tourneyService.GetAllTeamsAsync(id);
+            return Ok(_mapper.Map<List<TeamWithoutPlayerDto>>(teams));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
+
+    [HttpGet("{id}/staff")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<StaffDto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<List<StaffDto>>> GetStaff(int id)
+    {
+        try
+        {
+            var staff = await _tourneyService.GetAllStaffsAsync(id);
+            return Ok(_mapper.Map<List<StaffDto>>(staff));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
     }
 
 }

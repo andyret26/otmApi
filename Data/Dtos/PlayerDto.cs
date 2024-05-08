@@ -9,3 +9,10 @@ public class PlayerDto
     public string Country_code { get; set; } = null!;
     public string? DiscordUsername { get; set; }
 }
+
+public class PlayerMinDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = null!;
+
+}

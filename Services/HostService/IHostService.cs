@@ -1,12 +1,12 @@
 using Host = OtmApi.Data.Entities.Host;
 
 
-namespace OmtApi.Services.HostService;
+namespace OtmApi.Services.HostService;
 
 public interface IHostService
 {
     Task<Host> AddAsync(Host host);
-    Task<Host?> GetByIdAsync(int id);
+    Task<Host> GetByIdAsync(int id);
     List<Host> GetAsync();
     Task<Host?> DeleteAsync(int id);
     Task<Host?> UpdateAsync(int id, Host host);

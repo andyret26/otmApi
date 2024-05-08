@@ -116,6 +116,27 @@ public class TourneyService(DataContext db) : ITourneyService
         var tournament = await _db.Tournaments.Include(t => t.Staff).SingleOrDefaultAsync(t => t.Id == tournamentId);
         if (tournament == null) throw new NotFoundException("Tournament", tournamentId);
         if (tournament.Staff == null) return false;
-        return tournament.Staff.Any(s => s.Id == staffId);
+        return tournament.Staff.Any(s => s.Id == staffId && s.TournamentId == tournamentId);
+    }
+
+    public async Task<List<Player>> GetAllPlayersAsync(int tournamentId)
+    {
+        var t = await _db.Tournaments.Include(t => t.Players)!.ThenInclude(tp => tp.Player).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        return t.Players!.Select(tp => tp.Player).OrderBy(p => p.Username).ToList();
+    }
+
+    public async Task<List<Team>> GetAllTeamsAsync(int tournamentId)
+    {
+        var t = await _db.Tournaments.Include(t => t.Teams).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        return t.Teams!.OrderBy(t => t.TeamName).ToList();
+    }
+
+    public async Task<List<Staff>> GetAllStaffsAsync(int tournamentId)
+    {
+        var t = await _db.Tournaments.Include(t => t.Staff).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        return t.Staff!.OrderBy(s => s.Username).ToList();
     }
 }

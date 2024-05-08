@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OtmApi.Data;
@@ -12,9 +13,11 @@ using OtmApi.Data;
 namespace otmApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240507073210_Quals_referee")]
+    partial class Quals_referee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,14 +90,10 @@ namespace otmApi.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Num")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("RefereeId")
+                    b.Property<int>("Num")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("RefereeTournamentId")
+                    b.Property<int?>("RefereeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("RoundId")
@@ -102,9 +101,9 @@ namespace otmApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoundId");
+                    b.HasIndex("RefereeId");
 
-                    b.HasIndex("RefereeId", "RefereeTournamentId");
+                    b.HasIndex("RoundId");
 
                     b.ToTable("QualsSchedules");
                 });
@@ -178,10 +177,10 @@ namespace otmApi.Migrations
             modelBuilder.Entity("OtmApi.Data.Entities.Staff", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    b.Property<int>("TournamentId")
-                        .HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<List<string>>("Roles")
                         .IsRequired()
@@ -191,9 +190,7 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id", "TournamentId");
-
-                    b.HasIndex("TournamentId");
+                    b.HasKey("Id");
 
                     b.ToTable("Staff");
                 });
@@ -491,6 +488,21 @@ namespace otmApi.Migrations
                     b.ToTable("RoundMapSuggestion", (string)null);
                 });
 
+            modelBuilder.Entity("StaffTournament", b =>
+                {
+                    b.Property<int>("StaffId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TournamentsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("StaffId", "TournamentsId");
+
+                    b.HasIndex("TournamentsId");
+
+                    b.ToTable("TournamentStaff", (string)null);
+                });
+
             modelBuilder.Entity("OtmApi.Data.Entities.Player", b =>
                 {
                     b.HasOne("OtmApi.Data.Entities.QualsSchedule", null)
@@ -500,15 +512,15 @@ namespace otmApi.Migrations
 
             modelBuilder.Entity("OtmApi.Data.Entities.QualsSchedule", b =>
                 {
+                    b.HasOne("OtmApi.Data.Entities.Staff", "Referee")
+                        .WithMany()
+                        .HasForeignKey("RefereeId");
+
                     b.HasOne("OtmApi.Data.Entities.Round", "Round")
                         .WithMany()
                         .HasForeignKey("RoundId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("OtmApi.Data.Entities.Staff", "Referee")
-                        .WithMany()
-                        .HasForeignKey("RefereeId", "RefereeTournamentId");
 
                     b.Navigation("Referee");
 
@@ -559,17 +571,6 @@ namespace otmApi.Migrations
                     b.Navigation("Team1");
 
                     b.Navigation("Team2");
-                });
-
-            modelBuilder.Entity("OtmApi.Data.Entities.Staff", b =>
-                {
-                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
-                        .WithMany("Staff")
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Stats", b =>
@@ -685,6 +686,21 @@ namespace otmApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StaffTournament", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Staff", null)
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OtmApi.Data.Entities.Tournament", null)
+                        .WithMany()
+                        .HasForeignKey("TournamentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OtmApi.Data.Entities.Host", b =>
                 {
                     b.Navigation("Tournaments");
@@ -714,8 +730,6 @@ namespace otmApi.Migrations
                     b.Navigation("Players");
 
                     b.Navigation("Rounds");
-
-                    b.Navigation("Staff");
 
                     b.Navigation("Teams");
                 });

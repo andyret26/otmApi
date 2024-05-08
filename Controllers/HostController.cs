@@ -3,7 +3,7 @@ using System.Security.Claims;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OmtApi.Services.HostService;
+using OtmApi.Services.HostService;
 using OtmApi.Data.Dtos;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;

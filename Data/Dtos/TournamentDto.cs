@@ -31,28 +31,7 @@ public class StaffDto
     public int Id { get; set; }
     public string Username { get; set; } = null!;
     public List<string> Roles { get; set; } = null!;
-}
-
-public class TeamDto
-{
-    public int Id { get; set; }
-    public string TeamName { get; set; } = null!;
-    public List<OtmDashboardPlayerDto>? Players { get; set; }
-}
-public class TeamWithoutPlayerDto
-{
-    public int Id { get; set; }
-    public string TeamName { get; set; } = null!;
-}
-
-public class OtmDashboardPlayerDto
-{
-    public int Id { get; set; }
-    public string Username { get; set; } = null!;
-    public string Avatar_url { get; set; } = null!;
-    public int Global_rank { get; set; }
-    public string Country_code { get; set; } = null!;
-    public string? DiscordUsername { get; set; }
+    public int TournamentId { get; set; }
 }
 
 public class RoundDto

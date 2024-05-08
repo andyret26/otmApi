@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using OtmApi.Data;
+using OtmApi.Utils.Exceptions;
 using Host = OtmApi.Data.Entities.Host;
 
 
-namespace OmtApi.Services.HostService;
+namespace OtmApi.Services.HostService;
 
 public class HostService : IHostService
 {
@@ -30,9 +31,11 @@ public class HostService : IHostService
         throw new NotImplementedException();
     }
 
-    public Task<Host?> GetByIdAsync(int id)
+    public async Task<Host> GetByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        var host = await _db.Hosts.SingleOrDefaultAsync(h => h.Id == id);
+        if (host == null) throw new NotFoundException("Host", id);
+        return host;
     }
 
     public Task<Host?> UpdateAsync(int id, Host host)
