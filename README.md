@@ -1,5 +1,5 @@
 # Otm! Api
 
-Api for my [https://github.com/andyret26/otm](Otm!) application.
+Api for my [Otm!]([Otm!](https://github.com/andyret26/otm)) application.
 
 Using supabase for my Database.
