@@ -9,6 +9,7 @@ using OtmApi.Utils;
 using OtmApi.Utils.Exceptions;
 using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
+using Newtonsoft.Json;
 
 namespace OtmApi.Controllers;
 
@@ -58,6 +59,7 @@ public class ScheduleController(
         try
         {
             var res = await _scheduleService.GetQualsScheduleAsync(roundId);
+            System.Console.WriteLine(JsonConvert.SerializeObject(res));
             return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
         }
         catch (NotFoundException e)
@@ -93,4 +95,27 @@ public class ScheduleController(
         }
 
     }
+
+    [HttpPut("quals-schedule/{scheduleId}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(QualsScheduleDto))]
+
+    public async Task<ActionResult<QualsSchedulePutDto>> UpdateQualsScheduleAsync(int scheduleId, [FromBody] QualsSchedulePutDto request)
+    {
+
+        try
+        {
+            await _scheduleService.AddNamesToQualsScheduleAsync(scheduleId, request.Names);
+            if (request.RefId == 0) request.RefId = null;
+            var qs = await _scheduleService.SetQualsRefereeAsync(scheduleId, request.RefId);
+
+            return Ok(_mapper.Map<QualsScheduleDto>(qs));
+
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
+
+
 }

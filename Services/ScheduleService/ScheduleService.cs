@@ -9,6 +9,7 @@ public class ScheduleService(DataContext db) : IScheduleService
 {
     private readonly DataContext _db = db;
 
+
     public async Task<List<QualsSchedule>> GenerateQualsScheduleAsync(int tournamentId, int roundId, DateTime startDate, DateTime endDate)
     {
 
@@ -52,23 +53,42 @@ public class ScheduleService(DataContext db) : IScheduleService
     public async Task<List<QualsSchedule>> GetQualsScheduleAsync(int roundId)
     {
         if (!await _db.Rounds.AnyAsync(r => r.Id == roundId)) throw new NotFoundException("Round", roundId);
-        return await _db.QualsSchedules.Include(qs => qs.Teams).Include(qs => qs.Players).Where(qs => qs.RoundId == roundId).Include(qs => qs.Referee).ToListAsync();
+        var test = await _db.QualsSchedules.Where(qs => qs.RoundId == roundId).OrderBy(qs => qs.Id).ToListAsync();
+        return test;
     }
 
-    public async Task<Staff> SetQualsRefereeAsync(int scheduleId, int refId)
+    public async Task<QualsSchedule> SetQualsRefereeAsync(int scheduleId, int? refId)
     {
         var qs = await _db.QualsSchedules.SingleOrDefaultAsync(qs => qs.Id == scheduleId);
         if (qs == null) throw new NotFoundException("Quals Schedule", scheduleId);
-        var referee = await _db.Staff.SingleOrDefaultAsync(s => s.Id == refId);
-        if (referee == null) throw new NotFoundException("Referee", refId);
 
-        qs.Referee = referee;
+        if (refId == null)
+        {
+            qs.Referee = null;
+            await _db.SaveChangesAsync();
+            return qs;
+        }
+
+        var referee = await _db.Staff.SingleOrDefaultAsync(s => s.Id == refId);
+        if (referee == null) throw new NotFoundException("Referee", (int)refId);
+
+        qs.Referee = referee.Username;
         await _db.SaveChangesAsync();
-        return referee;
+        return qs;
     }
 
-    public Task<Staff> SetRefereeAsync(int scheduleId, int refereeId)
+    public Task<Staff> SetRefereeAsync(int scheduleId, int? refereeId)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<QualsSchedule> AddNamesToQualsScheduleAsync(int scheduleId, List<string>? names)
+    {
+        var qs = await _db.QualsSchedules.SingleOrDefaultAsync(qs => qs.Id == scheduleId);
+        if (qs == null) throw new NotFoundException("Quals Schedule", scheduleId);
+        if (names == null || names.Count == 0) qs.Names = null;
+        else qs.Names = names;
+        await _db.SaveChangesAsync();
+        return qs;
     }
 }

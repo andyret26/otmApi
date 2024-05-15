@@ -9,10 +9,11 @@ public class Schedule
     public int RoundId { get; set; }
     public Round Round { get; set; } = null!;
     public DateTime DateTime { get; set; }
-    public Team? Team1 { get; set; }
-    public Team? Team2 { get; set; }
-    public Player? Player1 { get; set; }
-    public Player? Player2 { get; set; }
+    public string? Referee { get; set; }
+    public string? Streamer { get; set; }
+    public List<string>? Commentators { get; set; }
+    public string? Name1 { get; set; }
+    public string? Name2 { get; set; }
 }
 public class QualsSchedule
 {
@@ -21,9 +22,8 @@ public class QualsSchedule
     public int RoundId { get; set; }
     public Round Round { get; set; } = null!;
     public DateTime DateTime { get; set; }
-    public List<Team>? Teams { get; set; }
-    public List<Player>? Players { get; set; }
+    public List<string>? Names { get; set; }
 
-    public Staff? Referee { get; set; }
+    public string? Referee { get; set; }
     public string Num { get; set; } = null!;
 }

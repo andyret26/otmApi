@@ -8,6 +8,7 @@ public interface IScheduleService
     Task<List<Schedule>> GenerateScheduleAsync(int tournamentId, int RoundId);
 
     Task<List<QualsSchedule>> GetQualsScheduleAsync(int roundId);
-    Task<Staff> SetQualsRefereeAsync(int scheduleId, int refereeId);
-    Task<Staff> SetRefereeAsync(int scheduleId, int refereeId);
+    Task<QualsSchedule> SetQualsRefereeAsync(int scheduleId, int? refereeId);
+    Task<Staff> SetRefereeAsync(int scheduleId, int? refereeId);
+    Task<QualsSchedule> AddNamesToQualsScheduleAsync(int scheduleId, List<string>? names);
 }
