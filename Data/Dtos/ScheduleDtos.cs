@@ -25,6 +25,12 @@ public class QualsSchedulePutDto
     public int ScheduleId { get; set; }
     public int? RefId { get; set; }
     public List<string>? Names { get; set; }
+}
 
-
+public class QualsScheduleAddExtraDto
+{
+    public int TourneyId { get; set; }
+    public int RoundId { get; set; }
+    public string Num { get; set; } = null!;
+    public DateTime DateTime { get; set; }
 }

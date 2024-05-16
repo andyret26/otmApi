@@ -10,6 +10,7 @@ using OtmApi.Utils.Exceptions;
 using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
 using Newtonsoft.Json;
+using OtmApi.Data.Entities;
 
 namespace OtmApi.Controllers;
 
@@ -109,7 +110,7 @@ public class ScheduleController(
 
             var staff = await _staffService.GetByIdAsync(osuId, request.TourneyId);
             if (!await _tourneyService.StaffsInTourneyAsync(request.TourneyId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
-            if (!staff.Roles.Any(r => r == "referee" || r == "admin")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee or admin role"));
+            if (!staff.Roles.Any(r => r == "referee" || r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee or admin role"));
 
             await _scheduleService.AddNamesToQualsScheduleAsync(scheduleId, request.Names);
             if (request.RefId == 0) request.RefId = null;
@@ -124,5 +125,36 @@ public class ScheduleController(
         }
     }
 
+    [HttpPost("quals-schedule/add-extra")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(QualsScheduleDto))]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> QualsScheduleAddExtraAsync([FromBody] QualsScheduleAddExtraDto request)
+    {
+        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
+        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+        try
+        {
+            var staff = await _staffService.GetByIdAsync(osuId, request.TourneyId);
+            if (!await _tourneyService.StaffsInTourneyAsync(request.TourneyId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
+            if (!staff.Roles.Any(r => r == "referee" || r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the appropriate role"));
+
+
+            var qs = new QualsSchedule
+            {
+                RoundId = request.RoundId,
+                DateTime = request.DateTime,
+                Num = request.Num
+            };
+            var addedQs = await _scheduleService.AddQualsScheduleAsync(qs);
+            return Ok(_mapper.Map<QualsScheduleDto>(addedQs));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
 
 }

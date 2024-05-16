@@ -91,4 +91,14 @@ public class ScheduleService(DataContext db) : IScheduleService
         await _db.SaveChangesAsync();
         return qs;
     }
+
+    public async Task<QualsSchedule> AddQualsScheduleAsync(QualsSchedule qualsSchedule)
+    {
+        var round = await _db.Rounds.SingleOrDefaultAsync(r => r.Id == qualsSchedule.RoundId);
+        if (round == null) throw new NotFoundException("Round", qualsSchedule.RoundId);
+        qualsSchedule.Round = round;
+        await _db.QualsSchedules.AddAsync(qualsSchedule);
+        await _db.SaveChangesAsync();
+        return qualsSchedule;
+    }
 }
