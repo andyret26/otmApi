@@ -59,7 +59,6 @@ public class ScheduleController(
         try
         {
             var res = await _scheduleService.GetQualsScheduleAsync(roundId);
-            System.Console.WriteLine(JsonConvert.SerializeObject(res));
             return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
         }
         catch (NotFoundException e)

@@ -76,7 +76,6 @@ class OsuApiService : IOsuApiService
 
         if (playerIdsToAdd.Count == 0)
         {
-            Console.WriteLine("All players already exist in DB");
             return null;
         }
         // DO Request
@@ -131,7 +130,6 @@ class OsuApiService : IOsuApiService
                 var respObj = JsonConvert.DeserializeObject<PlayerResponseData>(responseBody)!;
                 if (_playerService.Exists(respObj.Id))
                 {
-                    Console.WriteLine("Player already exists in DB");
                     throw new AlreadyExistException();
                 }
                 else
@@ -139,8 +137,7 @@ class OsuApiService : IOsuApiService
                     var players = await GetPlayers(new List<int> { respObj.Id });
                     if (players == null)
                     {
-                        Console.WriteLine("Player not found");
-                        throw new NotFoundException();
+                        throw new NotFoundException("Player", respObj.Id);
                     }
                     return players[0];
                 }
@@ -329,7 +326,6 @@ class OsuApiService : IOsuApiService
         if (resp.IsSuccessStatusCode)
         {
             string responseBody = await resp.Content.ReadAsStringAsync();
-            Console.WriteLine(responseBody);
             return JsonConvert.DeserializeObject<AttributeResponse>(responseBody)!.Attributes;
         }
         else

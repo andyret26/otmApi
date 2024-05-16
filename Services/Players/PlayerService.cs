@@ -30,9 +30,8 @@ public class PlayerService : IPlayerService
             var players = _db.Players.ToList();
             return players;
         }
-        catch (SqlException err)
+        catch (SqlException)
         {
-            Console.WriteLine(err.Message);
             throw;
         }
     }
@@ -85,31 +84,6 @@ public class PlayerService : IPlayerService
     {
 
         throw new NotImplementedException();
-        // TODO use automapper to update
-        // try
-        // {
-        //     var playerToUpdate = _db.Players.SingleOrDefault((t) => t.Id == player.Id);
-        //     if (playerToUpdate != null)
-        //     {
-        //         playerToUpdate.Name = player.Name;
-        //         playerToUpdate.Rank = player.Rank;
-        //         playerToUpdate.Country = player.Country;
-        //         playerToUpdate.Tournaments = player.Tournaments;
-
-        //         _db.SaveChanges();
-        //         return playerToUpdate;
-        //     }
-        //     else
-        //     {
-        //         return null;
-        //     }
-
-        // }
-        // catch (SqlException err)
-        // {
-        //     Console.WriteLine(err.Message);
-        //     throw;
-        // }
     }
 
     public bool Exists(int id)
