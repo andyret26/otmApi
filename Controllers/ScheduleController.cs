@@ -97,13 +97,21 @@ public class ScheduleController(
     }
 
     [HttpPut("quals-schedule/{scheduleId}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(QualsScheduleDto))]
 
     public async Task<ActionResult<QualsSchedulePutDto>> UpdateQualsScheduleAsync(int scheduleId, [FromBody] QualsSchedulePutDto request)
     {
-
+        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
+        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
         try
         {
+
+            var staff = await _staffService.GetByIdAsync(osuId, request.TourneyId);
+            if (!await _tourneyService.StaffsInTourneyAsync(request.TourneyId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
+            if (!staff.Roles.Any(r => r == "referee" || r == "admin")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee or admin role"));
+
             await _scheduleService.AddNamesToQualsScheduleAsync(scheduleId, request.Names);
             if (request.RefId == 0) request.RefId = null;
             var qs = await _scheduleService.SetQualsRefereeAsync(scheduleId, request.RefId);
