@@ -11,6 +11,11 @@ using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
 using Newtonsoft.Json;
 using OtmApi.Data.Entities;
+using Microsoft.AspNetCore.RateLimiting;
+using OtmApi.Services.OsuApi;
+using OtmApi.Services.MapService;
+using OtmApi.Services.Players;
+using OtmApi.Services.RoundService;
 
 namespace OtmApi.Controllers;
 
@@ -20,7 +25,10 @@ public class ScheduleController(
     IMapper mapper,
     IHostService hostService,
     IStaffService staffService,
-    ITourneyService tourneyService
+    ITourneyService tourneyService,
+    IOsuApiService osuApiService,
+    IMapService mapService,
+    IRoundService roundService
     ) : ControllerBase
 {
     private readonly IScheduleService _scheduleService = scheduleService;
@@ -28,6 +36,9 @@ public class ScheduleController(
     private readonly IHostService _hostService = hostService;
     private readonly IStaffService _staffService = staffService;
     private readonly ITourneyService _tourneyService = tourneyService;
+    private readonly IOsuApiService _osuApiService = osuApiService;
+    private readonly IMapService _mapService = mapService;
+    private readonly IRoundService _roundService = roundService;
 
     [HttpPost("generate-qualifier")]
     [Authorize]
@@ -99,6 +110,7 @@ public class ScheduleController(
     [HttpPut("quals-schedule/{scheduleId}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(QualsScheduleDto))]
+    [EnableRateLimiting("fixed")]
 
     public async Task<ActionResult<QualsSchedulePutDto>> UpdateQualsScheduleAsync(int scheduleId, [FromBody] QualsSchedulePutDto request)
     {
@@ -108,9 +120,21 @@ public class ScheduleController(
         try
         {
 
+
             var staff = await _staffService.GetByIdAsync(osuId, request.TourneyId);
             if (!await _tourneyService.StaffsInTourneyAsync(request.TourneyId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
             if (!staff.Roles.Any(r => r == "referee" || r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee or admin role"));
+
+
+            // stats stuff
+            if (request.MpLinkId != 0 && request.MpLinkId != null && !await _roundService.StatsForMatchExistAsync((int)request.MpLinkId))
+            {
+                var stats = await MatchToStats(request);
+                await _roundService.AddStatsAsync(stats);
+            }
+
+            // ######
+
 
             await _scheduleService.AddNamesToQualsScheduleAsync(scheduleId, request.Names);
             if (request.RefId == 0) request.RefId = null;
@@ -157,4 +181,66 @@ public class ScheduleController(
         }
     }
 
+    private async Task<List<Stats>> MatchToStats(QualsSchedulePutDto request)
+    {
+        var tournament = await _tourneyService.GetByIdAsync(request.TourneyId);
+        var games = await _osuApiService.GetMatchGamesV1Async((long)request.MpLinkId!);
+        var round = await _roundService.GetRoundByIdAsync(request.RoundId);
+        var players = new List<Player>();
+
+        if (tournament!.IsTeamTourney)
+        {
+            var teams = await _tourneyService.GetAllTeamsAsync(request.TourneyId);
+            foreach (var team in teams) players.AddRange(team.Players!);
+        }
+        else
+        {
+            players = await _tourneyService.GetAllPlayersAsync(request.TourneyId);
+        }
+
+
+
+        var statsList = new List<Stats>();
+        foreach (var g in games)
+        {
+            if (round.Mappool!.Any(t => t.Id == g.Beatmap_id))
+            {
+                foreach (var s in g.Scores)
+                {
+                    if (players.Any(p => p.Id == s.User_id))
+                    {
+                        if (statsList.Any(sl => sl.PlayerId == s.User_id && sl.MapId == g.Beatmap_id))
+                        {
+                            var oldStatIndex = statsList.FindIndex(sl => sl.PlayerId == s.User_id && sl.MapId == g.Beatmap_id);
+                            if (statsList[oldStatIndex].Score < s.Score) statsList[oldStatIndex].Score = s.Score;
+                        }
+                        else
+                        {
+
+                            var stat = new Stats
+                            {
+                                MapId = g.Beatmap_id,
+                                Map = round.Mappool!.Single(m => m.Id == g.Beatmap_id),
+
+                                Acc = 0,
+                                Mods = [],
+
+                                PlayerId = s.User_id,
+                                Player = players.Single(p => p.Id == s.User_id),
+
+                                RoundId = request.RoundId,
+                                Round = round,
+
+                                Score = s.Score
+
+                            };
+                            statsList.Add(stat);
+                        }
+                    }
+                }
+            }
+        }
+        return statsList;
+
+    }
 }

@@ -15,6 +15,7 @@ public class DataContext : DbContext
     public DbSet<TMapSuggestion> MapSuggestions { get; set; } = null!;
     public DbSet<Schedule> Schedules { get; set; } = null!;
     public DbSet<QualsSchedule> QualsSchedules { get; set; } = null!;
+    public DbSet<Stats> Stats { get; set; } = null!;
 
     public DbSet<TournamentPlayer> TournamentPlayer { get; set; } = null!;
 

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OtmApi.Data;
@@ -12,9 +13,11 @@ using OtmApi.Data;
 namespace otmApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240521114918_Stas_matchId")]
+    partial class Stas_matchId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,6 +174,9 @@ namespace otmApi.Migrations
                     b.Property<int>("TournamentId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("MatchId")
+                        .HasColumnType("integer");
+
                     b.Property<List<string>>("Roles")
                         .IsRequired()
                         .HasColumnType("text[]");
@@ -203,9 +209,6 @@ namespace otmApi.Migrations
                     b.Property<string>("MapMod")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<int>("MatchId")
-                        .HasColumnType("integer");
 
                     b.Property<List<string>>("Mods")
                         .HasColumnType("text[]");

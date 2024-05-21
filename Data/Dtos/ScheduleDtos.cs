@@ -22,9 +22,11 @@ public class QualsScheduleDto
 public class QualsSchedulePutDto
 {
     public int TourneyId { get; set; }
+    public int RoundId { get; set; }
     public int ScheduleId { get; set; }
     public int? RefId { get; set; }
     public List<string>? Names { get; set; }
+    public int? MpLinkId { get; set; }
 }
 
 public class QualsScheduleAddExtraDto

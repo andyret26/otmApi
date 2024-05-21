@@ -44,4 +44,16 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         await _db.SaveChangesAsync();
         return map;
     }
+
+    public async Task<List<Stats>> AddStatsAsync(List<Stats> stats)
+    {
+        await _db.Stats.AddRangeAsync(stats);
+        await _db.SaveChangesAsync();
+        return stats;
+    }
+
+    public Task<bool> StatsForMatchExistAsync(int matchId)
+    {
+        return _db.Stats.AnyAsync(s => s.MatchId == matchId);
+    }
 }

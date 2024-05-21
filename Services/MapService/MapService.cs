@@ -16,6 +16,7 @@ public class MapService(DataContext db) : IMapService
         return addedSuggestion.Entity;
     }
 
+
     public async Task<TMapSuggestion> GetMapSuggestionAsync(int mapId, string mod)
     {
         var ms = await _db.MapSuggestions.SingleOrDefaultAsync(s => s.Id == mapId && s.Mod == mod);
@@ -29,6 +30,11 @@ public class MapService(DataContext db) : IMapService
         return await _db.MapSuggestions.AnyAsync(s => s.Id == mapId && s.Mod == mod);
     }
 
+    public async Task<List<TMap>> GetMapsByRoundIdAsync(int roundId)
+    {
+        var maps = await _db.Maps.Where(m => m.Rounds!.Any(r => r.Id == roundId)).ToListAsync();
+        return maps;
+    }
 
 
 

@@ -23,6 +23,7 @@ public class OtmMapper : Profile
         CreateMap<Tournament, TournamentSimpleDto>();
         CreateMap<TournamentSimpleDto, Tournament>();
         CreateMap<Staff, StaffDto>();
+        CreateMap<Stats, StatsDto>();
 
 
         CreateMap<Beatmap, TMap>()
