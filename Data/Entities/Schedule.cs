@@ -14,6 +14,7 @@ public class Schedule
     public List<string>? Commentators { get; set; }
     public string? Name1 { get; set; }
     public string? Name2 { get; set; }
+    public int? MatchId { get; set; }
 }
 public class QualsSchedule
 {
@@ -26,4 +27,7 @@ public class QualsSchedule
 
     public string? Referee { get; set; }
     public string Num { get; set; } = null!;
+
+    public int? MatchId { get; set; }
+    public bool MpLinkIsVisable { get; set; } = false;
 }

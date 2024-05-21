@@ -101,4 +101,13 @@ public class ScheduleService(DataContext db) : IScheduleService
         await _db.SaveChangesAsync();
         return qualsSchedule;
     }
+
+    public async Task<QualsSchedule> SetQualsMatchIdAsync(int scheduleId, int? MatchId)
+    {
+        var qs = await _db.QualsSchedules.SingleOrDefaultAsync(qs => qs.Id == scheduleId);
+        if (qs == null) throw new NotFoundException("Quals Schedule", scheduleId);
+        qs.MatchId = MatchId;
+        await _db.SaveChangesAsync();
+        return qs;
+    }
 }

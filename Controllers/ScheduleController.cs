@@ -137,6 +137,7 @@ public class ScheduleController(
 
 
             await _scheduleService.AddNamesToQualsScheduleAsync(scheduleId, request.Names);
+            await _scheduleService.SetQualsMatchIdAsync(scheduleId, request.MpLinkId);
             if (request.RefId == 0) request.RefId = null;
             var qs = await _scheduleService.SetQualsRefereeAsync(scheduleId, request.RefId);
 

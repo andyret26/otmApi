@@ -17,6 +17,8 @@ public class QualsScheduleDto
 
     public string? Referee { get; set; }
     public string Num { get; set; } = null!;
+
+    public int? MatchId { get; set; }
 }
 
 public class QualsSchedulePutDto
