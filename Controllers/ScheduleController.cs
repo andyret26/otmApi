@@ -182,6 +182,33 @@ public class ScheduleController(
         }
     }
 
+    [HttpPut("tournament/{tournamentId}/round/{roundId}/mp-visibility")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+
+    public async Task<ActionResult> HandleMpVisibility(int tournamentId, int roundId)
+    {
+        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
+        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+        try
+        {
+            var staff = await _staffService.GetByIdAsync(osuId, tournamentId);
+            if (!await _tourneyService.StaffsInTourneyAsync(tournamentId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
+            if (!staff.Roles.Any(r => r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the host or admin role"));
+
+            await _scheduleService.ChangeMpVisibilityAsync(roundId);
+
+            return Ok();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
+
     private async Task<List<Stats>> MatchToStats(QualsSchedulePutDto request)
     {
         var tournament = await _tourneyService.GetByIdAsync(request.TourneyId);

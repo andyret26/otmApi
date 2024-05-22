@@ -14,4 +14,5 @@ public interface IScheduleService
 
     Task<QualsSchedule> AddNamesToQualsScheduleAsync(int scheduleId, List<string>? names);
     Task<QualsSchedule> AddQualsScheduleAsync(QualsSchedule qualsSchedule);
+    Task ChangeMpVisibilityAsync(int roundId);
 }
