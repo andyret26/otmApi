@@ -28,6 +28,7 @@ public class Team
     public int Id { get; set; }
     public string TeamName { get; set; } = null!;
     public List<Player>? Players { get; set; }
+    public List<TeamStats>? TeamStats { get; set; }
     public bool Isknockout { get; set; }
 }
 

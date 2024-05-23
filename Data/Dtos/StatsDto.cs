@@ -1,12 +1,12 @@
 namespace OtmApi.Data.Dtos;
 
-public class StatsDto
+public class PlayerStatsDto
 {
     public int MapId { get; set; }
-    public MapDto Map { get; set; } = null!;
+    public MapMinDto Map { get; set; } = null!;
 
     public int PlayerId { get; set; }
-    public PlayerDto Player { get; set; } = null!;
+    public PlayerMinDto Player { get; set; } = null!;
 
     public int Score { get; set; }
     public decimal Acc { get; set; }

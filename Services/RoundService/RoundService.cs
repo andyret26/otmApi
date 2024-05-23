@@ -45,16 +45,16 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         return map;
     }
 
-    public async Task<List<Stats>> AddStatsAsync(List<Stats> stats)
+    public async Task<List<PlayerStats>> AddPlayerStatsAsync(List<PlayerStats> stats)
     {
-        await _db.Stats.AddRangeAsync(stats);
+        await _db.PlayerStats.AddRangeAsync(stats);
         await _db.SaveChangesAsync();
         return stats;
     }
 
     public Task<bool> StatsForMatchExistAsync(int matchId)
     {
-        return _db.Stats.AnyAsync(s => s.MatchId == matchId);
+        return _db.PlayerStats.AnyAsync(s => s.MatchId == matchId);
     }
 
     public async Task<bool> ChangeMpVisibilityAsync(int roundId)
@@ -64,5 +64,10 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         round.IsMpLinksPublic = !round.IsMpLinksPublic;
         await _db.SaveChangesAsync();
         return round.IsMpLinksPublic;
+    }
+
+    public Task<List<PlayerStats>> GetPlayerStats(int roundId)
+    {
+        throw new NotImplementedException();
     }
 }

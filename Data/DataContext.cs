@@ -15,14 +15,18 @@ public class DataContext : DbContext
     public DbSet<TMapSuggestion> MapSuggestions { get; set; } = null!;
     public DbSet<Schedule> Schedules { get; set; } = null!;
     public DbSet<QualsSchedule> QualsSchedules { get; set; } = null!;
-    public DbSet<Stats> Stats { get; set; } = null!;
+    public DbSet<PlayerStats> PlayerStats { get; set; } = null!;
+    public DbSet<TeamStats> TeamStats { get; set; } = null!;
 
     public DbSet<TournamentPlayer> TournamentPlayer { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Stats>()
+        modelBuilder.Entity<PlayerStats>()
             .HasKey(s => new { s.MapId, s.PlayerId, s.RoundId });
+
+        modelBuilder.Entity<TeamStats>()
+            .HasKey(s => new { s.MapId, s.TeamId, s.RoundId });
 
         modelBuilder.Entity<Staff>()
             .HasKey(s => new { s.Id, s.TournamentId });

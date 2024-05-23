@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
 using OtmApi.Services.MapService;
@@ -143,6 +142,15 @@ public class RoundController(
 
             throw;
         }
+    }
+
+    [HttpGet("{roundId}/stats")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PlayerStatsDto>))]
+    public async Task<ActionResult<List<PlayerStatsDto>>> GetStats(int roundId)
+    {
+        var stats = await _roundService.GetPlayerStats(roundId);
+        return Ok(_mapper.Map<List<PlayerStatsDto>>(stats));
+
     }
 
 

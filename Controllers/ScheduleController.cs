@@ -129,8 +129,8 @@ public class ScheduleController(
             // stats stuff
             if (request.MpLinkId != 0 && request.MpLinkId != null && !await _roundService.StatsForMatchExistAsync((int)request.MpLinkId))
             {
-                var stats = await MatchToStats(request);
-                await _roundService.AddStatsAsync(stats);
+                var stats = await MatchToPlayerStats(request);
+                await _roundService.AddPlayerStatsAsync(stats);
             }
 
             // ######
@@ -209,7 +209,17 @@ public class ScheduleController(
         }
     }
 
-    private async Task<List<Stats>> MatchToStats(QualsSchedulePutDto request)
+
+
+
+
+
+
+
+
+
+
+    private async Task<List<PlayerStats>> MatchToPlayerStats(QualsSchedulePutDto request)
     {
         var tournament = await _tourneyService.GetByIdAsync(request.TourneyId);
         var games = await _osuApiService.GetMatchGamesV1Async((long)request.MpLinkId!);
@@ -228,7 +238,7 @@ public class ScheduleController(
 
 
 
-        var statsList = new List<Stats>();
+        var statsList = new List<PlayerStats>();
         foreach (var g in games)
         {
             if (round.Mappool!.Any(t => t.Id == g.Beatmap_id))
@@ -245,7 +255,7 @@ public class ScheduleController(
                         else
                         {
 
-                            var stat = new Stats
+                            var stat = new PlayerStats
                             {
                                 MapId = g.Beatmap_id,
                                 Map = round.Mappool!.Single(m => m.Id == g.Beatmap_id),
@@ -259,7 +269,8 @@ public class ScheduleController(
                                 RoundId = request.RoundId,
                                 Round = round,
 
-                                Score = s.Score
+                                Score = s.Score,
+                                MatchId = (int)request.MpLinkId!
 
                             };
                             statsList.Add(stat);
