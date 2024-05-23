@@ -199,7 +199,7 @@ public class ScheduleController(
             if (!await _tourneyService.StaffsInTourneyAsync(tournamentId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
             if (!staff.Roles.Any(r => r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the host or admin role"));
 
-            await _scheduleService.ChangeMpVisibilityAsync(roundId);
+            await _roundService.ChangeMpVisibilityAsync(roundId);
 
             return Ok();
         }

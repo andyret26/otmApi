@@ -56,4 +56,13 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
     {
         return _db.Stats.AnyAsync(s => s.MatchId == matchId);
     }
+
+    public async Task<bool> ChangeMpVisibilityAsync(int roundId)
+    {
+        var round = await _db.Rounds.SingleOrDefaultAsync(r => r.Id == roundId);
+        if (round == null) throw new NotFoundException("Round", roundId);
+        round.IsMpLinksPublic = !round.IsMpLinksPublic;
+        await _db.SaveChangesAsync();
+        return round.IsMpLinksPublic;
+    }
 }

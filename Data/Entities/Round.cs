@@ -12,6 +12,8 @@ public class Round
     public List<TMapSuggestion>? MapSuggestions { get; set; }
     public int TournamentId { get; set; }
     public Tournament Tournament { get; set; } = null!;
+    public bool IsMpLinksPublic { get; set; } = false;
+    public bool IsStatsPublic { get; set; } = false;
 }
 
 public class TMap

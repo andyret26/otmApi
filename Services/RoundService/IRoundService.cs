@@ -9,4 +9,5 @@ public interface IRoundService
     public Task<TMap> AddSuggestionToPoolAsync(int roundId, int mapId, string mod);
     public Task<List<Stats>> AddStatsAsync(List<Stats> stats);
     public Task<bool> StatsForMatchExistAsync(int matchId);
+    public Task<bool> ChangeMpVisibilityAsync(int roundId);
 }

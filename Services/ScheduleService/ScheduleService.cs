@@ -111,13 +111,4 @@ public class ScheduleService(DataContext db) : IScheduleService
         return qs;
     }
 
-    public async Task ChangeMpVisibilityAsync(int roundId)
-    {
-        var qualsRows = await _db.QualsSchedules.Where(qs => qs.RoundId == roundId).ToListAsync();
-        foreach (var row in qualsRows)
-        {
-            row.MpLinkIsVisable = !row.MpLinkIsVisable;
-        }
-        await _db.SaveChangesAsync();
-    }
 }

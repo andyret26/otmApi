@@ -19,7 +19,6 @@ public class QualsScheduleDto
     public string Num { get; set; } = null!;
 
     public int? MatchId { get; set; }
-    public bool MpLinkIsVisable { get; set; }
 }
 
 public class QualsSchedulePutDto
