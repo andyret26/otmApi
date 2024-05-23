@@ -139,4 +139,11 @@ public class TourneyService(DataContext db) : ITourneyService
         if (t == null) throw new NotFoundException("Tournament", tournamentId);
         return t.Staff!.OrderBy(s => s.Username).ToList();
     }
+
+    public async Task<bool> IsTeamTourneyAsync(int tournamentId)
+    {
+        var t = await _db.Tournaments.SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        return t.IsTeamTourney;
+    }
 }

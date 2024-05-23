@@ -16,6 +16,7 @@ using OtmApi.Services.OsuApi;
 using OtmApi.Services.MapService;
 using OtmApi.Services.Players;
 using OtmApi.Services.RoundService;
+using AutoMapper.Internal.Mappers;
 
 namespace OtmApi.Controllers;
 
@@ -129,8 +130,9 @@ public class ScheduleController(
             // stats stuff
             if (request.MpLinkId != 0 && request.MpLinkId != null && !await _roundService.StatsForMatchExistAsync((int)request.MpLinkId))
             {
-                var stats = await MatchToPlayerStats(request);
-                await _roundService.AddPlayerStatsAsync(stats);
+                var (playerStats, teamStats) = await MatchToStats(request);
+                await _roundService.AddPlayerStatsAsync(playerStats);
+                if (teamStats.Count > 0) await _roundService.AddTeamStatsAsync(teamStats);
             }
 
             // ######
@@ -219,23 +221,23 @@ public class ScheduleController(
 
 
 
-    private async Task<List<PlayerStats>> MatchToPlayerStats(QualsSchedulePutDto request)
+    private async Task<(List<PlayerStats>, List<TeamStats>)> MatchToStats(QualsSchedulePutDto request)
     {
         var tournament = await _tourneyService.GetByIdAsync(request.TourneyId);
         var games = await _osuApiService.GetMatchGamesV1Async((long)request.MpLinkId!);
         var round = await _roundService.GetRoundByIdAsync(request.RoundId);
         var players = new List<Player>();
+        var teams = new List<Team>();
 
         if (tournament!.IsTeamTourney)
         {
-            var teams = await _tourneyService.GetAllTeamsAsync(request.TourneyId);
+            teams = await _tourneyService.GetAllTeamsAsync(request.TourneyId);
             foreach (var team in teams) players.AddRange(team.Players!);
         }
         else
         {
             players = await _tourneyService.GetAllPlayersAsync(request.TourneyId);
         }
-
 
 
         var statsList = new List<PlayerStats>();
@@ -279,7 +281,52 @@ public class ScheduleController(
                 }
             }
         }
-        return statsList;
+
+
+        var teamStatsList = new List<TeamStats>();
+        if (tournament.IsTeamTourney)
+        {
+            // creat teamStats in a seperate list
+            foreach (var stat in statsList)
+            {
+                if (teams.Any(t => t.Players!.Any(p => p.Id == stat.PlayerId)))
+                {
+                    var team = teams.Single(t => t.Players!.Any(p => p.Id == stat.PlayerId));
+                    if (teamStatsList.Any(ts => ts.TeamId == team.Id && ts.MapId == stat.MapId))
+                    {
+                        var oldStatIndex = teamStatsList.FindIndex(ts => ts.TeamId == team.Id && ts.MapId == stat.MapId);
+                        teamStatsList[oldStatIndex].TotalScore += stat.Score;
+                        teamStatsList[oldStatIndex].AvgScore = teamStatsList[oldStatIndex].TotalScore / int.Parse(tournament.Format[..1]);
+                    }
+                    else
+                    {
+                        var teamStat = new TeamStats
+                        {
+                            MapId = stat.MapId,
+                            Map = stat.Map,
+
+                            TeamId = team.Id,
+                            Team = team,
+
+                            RoundId = request.RoundId,
+                            Round = round,
+
+                            TotalScore = stat.Score,
+                            AvgScore = stat.Score,
+                            Acc = 0,
+
+                            MatchId = (int)request.MpLinkId!
+                        };
+                        teamStatsList.Add(teamStat);
+                    }
+                }
+
+            }
+            return (statsList, teamStatsList);
+        }
+
+
+        return (statsList, []);
 
     }
 }

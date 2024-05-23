@@ -51,6 +51,12 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         await _db.SaveChangesAsync();
         return stats;
     }
+    public async Task<List<TeamStats>> AddTeamStatsAsync(List<TeamStats> stats)
+    {
+        await _db.TeamStats.AddRangeAsync(stats);
+        await _db.SaveChangesAsync();
+        return stats;
+    }
 
     public Task<bool> StatsForMatchExistAsync(int matchId)
     {
