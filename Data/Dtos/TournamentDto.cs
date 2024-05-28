@@ -34,27 +34,10 @@ public class StaffDto
     public int TournamentId { get; set; }
 }
 
-public class RoundDto
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = null!;
-    public bool IsQualifier { get; set; }
-    public bool IsMpLinksPublic { get; set; }
-    public bool IsStatsPublic { get; set; }
-}
-
-public class RoundPostDto
-{
-    public string Name { get; set; } = null!;
-    public bool IsQualifier { get; set; }
-}
 
 public class TournamentPlayerDto
 {
     public int PlayerId { get; set; }
-    public PlayerDto Player { get; set; } = null!;
     public int TournamentId { get; set; }
-    public TournamentSimpleDto Tournament { get; set; } = null!;
-
     public bool Isknockout { get; set; } = false;
 }

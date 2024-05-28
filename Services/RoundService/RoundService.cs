@@ -24,9 +24,19 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
 
     public async Task<Round> GetRoundByIdAsync(int id)
     {
-        var round = await _db.Rounds.Include(r => r.Mappool).Include(r => r.MapSuggestions).SingleOrDefaultAsync(r => r.Id == id);
-        if (round == null) throw new NotFoundException("Round", id);
-        return round;
+        var r = await _db.Rounds
+            .Include(r => r.MapSuggestions)
+            .Include(r => r.Mappool!)
+                .ThenInclude(m => m.PlayerStats!)
+                    .ThenInclude(p => p.Player)
+                        .ThenInclude(p => p.Tournaments)
+            .Include(r => r.Mappool!)
+                .ThenInclude(m => m.TeamStats!)
+                    .ThenInclude(t => t.Team)
+            .Include(r => r.Tournament)
+            .SingleOrDefaultAsync(r => r.Id == id);
+        if (r == null) throw new NotFoundException("Round", id);
+        return r;
     }
     public async Task<TMap> AddSuggestionToPoolAsync(int roundId, int mapId, string mod)
     {
@@ -72,8 +82,26 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         return round.IsMpLinksPublic;
     }
 
-    public Task<List<PlayerStats>> GetPlayerStats(int roundId)
+    public async Task<(List<PlayerStats>, List<TeamStats>)> GetStats(int roundId)
     {
-        throw new NotImplementedException();
+        var pStats = await _db.PlayerStats.Where(s => s.RoundId == roundId).ToListAsync();
+        var tStats = await _db.TeamStats.Where(s => s.RoundId == roundId).ToListAsync();
+
+        return (pStats, tStats);
+    }
+
+    public async Task<List<TMap>> GetMapsAsync(int roundId)
+    {
+        var r = await _db.Rounds
+            .Include(r => r.Mappool!)
+                .ThenInclude(m => m.PlayerStats!)
+                    .ThenInclude(p => p.Player)
+                        .ThenInclude(p => p.Tournaments)
+            .Include(r => r.Mappool!)
+                .ThenInclude(m => m.TeamStats!)
+                    .ThenInclude(t => t.Team)
+            .SingleOrDefaultAsync(r => r.Id == roundId);
+        if (r == null) throw new NotFoundException("Round", roundId);
+        return r.Mappool!;
     }
 }

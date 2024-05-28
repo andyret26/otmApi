@@ -48,3 +48,14 @@ public class MapMinDto
     public string Version { get; set; } = null!;
     public string Url { get; set; } = null!;
 }
+
+public class MapWithStatsDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Artist { get; set; } = null!;
+    public string Version { get; set; } = null!;
+    public string Url { get; set; } = null!;
+    public List<PlayerStatsDto> PlayerStats { get; set; } = null!;
+    public List<TeamStatsDto> TeamStats { get; set; } = null!;
+}

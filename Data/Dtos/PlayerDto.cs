@@ -16,3 +16,10 @@ public class PlayerMinDto
     public string Username { get; set; } = null!;
 
 }
+public class PlayerMinWithTournamnetsDto
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = null!;
+    public List<TournamentPlayerDto> Tournaments { get; set; } = null!;
+
+}

@@ -36,12 +36,12 @@ public class RoundController(
     private readonly ITourneyService _tourneyService = tourneyService;
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<RoundWithMapsDto>> GetRoundById(int id)
+    public async Task<ActionResult<RoundDetaildDto>> GetRoundById(int id)
     {
         try
         {
             var round = await _roundService.GetRoundByIdAsync(id);
-            return Ok(_mapper.Map<RoundWithMapsDto>(round));
+            return Ok(_mapper.Map<RoundDetaildDto>(round));
 
         }
         catch (NotFoundException e)
@@ -145,11 +145,14 @@ public class RoundController(
     }
 
     [HttpGet("{roundId}/stats")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PlayerStatsDto>))]
-    public async Task<ActionResult<List<PlayerStatsDto>>> GetStats(int roundId)
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MapWithStatsDto))]
+    public async Task<ActionResult<List<MapWithStatsDto>>> GetStats(int roundId)
     {
-        var stats = await _roundService.GetPlayerStats(roundId);
-        return Ok(_mapper.Map<List<PlayerStatsDto>>(stats));
+        // var (playerStats, teamStats) = await _roundService.GetStats(roundId);
+        var maps = await _roundService.GetMapsAsync(roundId);
+
+
+        return Ok(_mapper.Map<List<MapWithStatsDto>>(maps));
 
     }
 

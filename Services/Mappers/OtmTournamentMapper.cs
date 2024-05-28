@@ -14,9 +14,10 @@ public class OtmMapper : Profile
         CreateMap<Staff, StaffDto>();
         CreateMap<Team, TeamDto>();
         CreateMap<Round, RoundDto>();
-        CreateMap<Round, RoundWithMapsDto>();
+        CreateMap<Round, RoundDetaildDto>();
         CreateMap<TMap, MapDto>();
         CreateMap<TMap, MapMinDto>();
+        CreateMap<TMap, MapWithStatsDto>();
         CreateMap<TMapSuggestion, MapSuggestionDto>();
         CreateMap<TMap, TMapSuggestion>();
         CreateMap<TMapSuggestion, TMap>();
@@ -25,6 +26,8 @@ public class OtmMapper : Profile
         CreateMap<TournamentSimpleDto, Tournament>();
         CreateMap<Staff, StaffDto>();
         CreateMap<PlayerStats, PlayerStatsDto>();
+        CreateMap<TeamStats, TeamStatsDto>();
+        CreateMap<TournamentPlayer, TournamentPlayerDto>();
 
 
         CreateMap<Beatmap, TMap>()

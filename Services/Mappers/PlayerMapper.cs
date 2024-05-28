@@ -16,6 +16,7 @@ namespace OtmApi.Services.Mappers
             CreateMap<TournamentPlayerDto, TournamentPlayer>();
             CreateMap<Player, PlayerMinDto>();
             CreateMap<Team, TeamWithoutPlayerDto>();
+            CreateMap<Player, PlayerMinWithTournamnetsDto>();
 
         }
     }
