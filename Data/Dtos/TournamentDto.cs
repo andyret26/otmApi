@@ -4,6 +4,7 @@ public class TournamentDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = null!;
+    public int HostId { get; set; }
     public string? FormuPostLink { get; set; }
     public bool IsTeamTourney { get; set; }
     public string Format { get; set; } = null!;

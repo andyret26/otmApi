@@ -7,8 +7,9 @@ public interface ITourneyService
     public Task<Tournament> AddAsync(Tournament tournament);
     public Task<List<Tournament>> GetAsync();
     public Task<Tournament?> GetByIdAsync(int id);
+    public Task<Tournament> GetByIdSimpleAsync(int id);
     public Task<Tournament?> UpdateAsync(Tournament tournament);
-    public Task<Tournament?> DeleteAsync(int id);
+    public Task DeleteAsync(int id);
 
     /// <summary>
     /// Get all tournaments created by the spcified host

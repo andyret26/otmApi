@@ -197,6 +197,10 @@ public class TournamentController(
         {
             return NotFound(new ErrorResponse("Not Found", 404, e.Message));
         }
+        catch (System.InvalidOperationException)
+        {
+            return Conflict(new ErrorResponse("Conflict", 409, "Player already exists in this tournament"));
+        }
 
     }
 
@@ -266,6 +270,32 @@ public class TournamentController(
         {
             var staff = await _tourneyService.GetAllStaffsAsync(id);
             return Ok(_mapper.Map<List<StaffDto>>(staff));
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
+
+
+    [HttpDelete("{tournamentId}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+
+
+    public async Task<ActionResult> DeleteTournament(int tournamentId)
+    {
+        var tokenId = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (tokenId == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
+        var osuId = int.Parse(tokenId.Value.Split("|")[2]);
+
+        try
+        {
+            var t = await _tourneyService.GetByIdSimpleAsync(tournamentId);
+            if (osuId != t.HostId) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
+            await _tourneyService.DeleteAsync(tournamentId);
+            return NoContent();
         }
         catch (NotFoundException e)
         {

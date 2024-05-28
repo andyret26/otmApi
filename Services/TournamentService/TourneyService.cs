@@ -16,9 +16,12 @@ public class TourneyService(DataContext db) : ITourneyService
         return tAdded.Entity;
     }
 
-    public Task<Tournament?> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var t = await _db.Tournaments.FindAsync(id);
+        if (t == null) throw new NotFoundException("Tournament", id);
+        _db.Tournaments.Remove(t);
+        await _db.SaveChangesAsync();
     }
 
     public async Task<List<Tournament>> GetAsync()
@@ -34,6 +37,13 @@ public class TourneyService(DataContext db) : ITourneyService
             .Include(t => t.Rounds)
             .Include(t => t.Staff)
             .FirstOrDefaultAsync(t => t.Id == id);
+        if (t == null) throw new NotFoundException("Tournament", id);
+        return t;
+    }
+    public async Task<Tournament> GetByIdSimpleAsync(int id)
+    {
+        var t = await _db.Tournaments
+            .SingleOrDefaultAsync(t => t.Id == id);
         if (t == null) throw new NotFoundException("Tournament", id);
         return t;
     }
