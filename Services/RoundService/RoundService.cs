@@ -13,11 +13,17 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
 
     public async Task<Round> AddSuggestionToRound(int roundId, TMapSuggestion mapSuggestion)
     {
-        var round = _db.Rounds.SingleOrDefault(r => r.Id == roundId);
+        var round = _db.Rounds.Include(r => r.MapSuggestions).SingleOrDefault(r => r.Id == roundId);
         if (round == null) throw new NotFoundException("Round", roundId);
         if (round.MapSuggestions == null) round.MapSuggestions = new List<TMapSuggestion>();
 
-        round.MapSuggestions.Add(mapSuggestion);
+        var ms = await _db.MapSuggestions.SingleOrDefaultAsync(m => m.Id == mapSuggestion.Id);
+        if (ms == null) throw new NotFoundException("MapSuggestion", mapSuggestion.Id);
+
+
+        _db.MapSuggestions.Attach(ms);
+
+        round.MapSuggestions.Add(ms);
         await _db.SaveChangesAsync();
         return round;
     }
@@ -48,11 +54,29 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
 
         if (round.Mappool == null) round.Mappool = new List<TMap>();
 
+        var map = await _db.Maps.SingleOrDefaultAsync(m => m.Id == mapId && m.Mod == mod);
+        if (map == null)
+        {
+            var newMap = _mapper.Map<TMap>(mapSuggestion);
+            round.Mappool.Add(newMap);
+            await _db.SaveChangesAsync();
+            return newMap;
+        }
 
-        var map = _mapper.Map<TMap>(mapSuggestion);
         round.Mappool.Add(map);
         await _db.SaveChangesAsync();
         return map;
+    }
+
+    public async Task RemoveSuggestionFromPoolAsync(int roundId, int mapId, string mod)
+    {
+        var r = await _db.Rounds.Include(r => r.Mappool).SingleOrDefaultAsync(r => r.Id == roundId);
+        if (r == null) throw new NotFoundException("Round", roundId);
+        var mIndex = r.Mappool!.FindIndex(m => m.Id == mapId && m.Mod == mod);
+        if (mIndex == -1) throw new NotFoundException("Map", mapId);
+        r.Mappool!.RemoveAt(mIndex);
+        await _db.SaveChangesAsync();
+        return;
     }
 
     public async Task<List<PlayerStats>> AddPlayerStatsAsync(List<PlayerStats> stats)

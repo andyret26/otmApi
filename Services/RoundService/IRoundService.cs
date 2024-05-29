@@ -7,6 +7,7 @@ public interface IRoundService
     public Task<Round> GetRoundByIdAsync(int id);
     public Task<Round> AddSuggestionToRound(int roundId, TMapSuggestion mapSuggestion);
     public Task<TMap> AddSuggestionToPoolAsync(int roundId, int mapId, string mod);
+    public Task RemoveSuggestionFromPoolAsync(int roundId, int mapId, string mod);
     public Task<List<PlayerStats>> AddPlayerStatsAsync(List<PlayerStats> stats);
     public Task<List<TeamStats>> AddTeamStatsAsync(List<TeamStats> stats);
     public Task<bool> StatsForMatchExistAsync(int matchId);

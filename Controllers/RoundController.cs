@@ -100,9 +100,9 @@ public class RoundController(
                 }
 
 
-                if (mapSuggestion.Mod != request.Mod && (request.Mod == "DT" || request.Mod == "HR"))
+                if (mapSuggestion.Mod != request.Mod && (request.Mod[..2] == "DT" || request.Mod[..2] == "HR"))
                 {
-                    var attributes = await _osuApiService.GetBeatmapAttributesAsync(mapSuggestion.Id, request.Mod);
+                    var attributes = await _osuApiService.GetBeatmapAttributesAsync(mapSuggestion.Id, request.Mod[..2]);
                     AttributeCalculate(mapSuggestion, attributes, request.Mod);
 
                 }
@@ -125,9 +125,11 @@ public class RoundController(
 
     }
 
-    [HttpPost("{roundId}/mappool/")]
+    [HttpPost("{roundId}/mappool")]
+    [Authorize]
     public async Task<ActionResult<MapDto>> AddSuggestionToPool(string roundId, [FromBody] PostSuggestionDto request)
     {
+        // TODO Auth stuff
         try
         {
             var map = await _roundService.AddSuggestionToPoolAsync(int.Parse(roundId), request.MapId, request.Mod);
@@ -141,6 +143,26 @@ public class RoundController(
         {
 
             throw;
+        }
+    }
+
+    [HttpPost("{roundId}/mappool/remove-suggestion")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> RemoveSuggestionFromPool(int roundId, [FromBody] PostSuggestionDto request)
+    {
+        // TODO Auth stuff
+        if (roundId != request.RoundId) return BadRequest(new ErrorResponse("BadRequest", 400, "RoundId in the path does not match the RoundId in the body"));
+        try
+        {
+            await _roundService.RemoveSuggestionFromPoolAsync(roundId, request.MapId, request.Mod);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("NotFound", 404, e.Message));
         }
     }
 
