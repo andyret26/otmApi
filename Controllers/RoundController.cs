@@ -9,6 +9,7 @@ using OtmApi.Data.Entities;
 using OtmApi.Services.MapService;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.RoundService;
+using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
 using OtmApi.Utils;
 using OtmApi.Utils.Exceptions;
@@ -26,7 +27,8 @@ public class RoundController(
     IMapper mapper,
     IOsuApiService osuApiService,
     IMapService mapService,
-    ITourneyService tourneyService
+    ITourneyService tourneyService,
+    IStaffService staffService
     ) : ControllerBase
 {
     private readonly IRoundService _roundService = roundService;
@@ -34,6 +36,7 @@ public class RoundController(
     private readonly IOsuApiService _osuApiService = osuApiService;
     private readonly IMapService _mapService = mapService;
     private readonly ITourneyService _tourneyService = tourneyService;
+    private readonly IStaffService _staffService = staffService;
 
     [HttpGet("{id}")]
     public async Task<ActionResult<RoundDetaildDto>> GetRoundById(int id)
@@ -62,20 +65,9 @@ public class RoundController(
         if (roundId != request.RoundId) return BadRequest(new ErrorResponse("BadRequest", 400, "RoundId in the path does not match the RoundId in the body"));
         try
         {
-
-
-            // ### auth stuff ###
-            var sub = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (sub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
-            var osuId = int.Parse(sub.Split("|")[2]);
-
-            var tourney = await _tourneyService.GetByIdAsync(request.TournamentId);
-            if (tourney!.HostId != osuId)
-            {
-                if (tourney!.Staff == null || !tourney.Staff.Any(s => s.Id == osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't Staff in this tournament"));
-            }
-
-            // ### auth stuff end ###
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TournamentId, ["mappooler", "admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
 
             TMapSuggestion mapSuggestion;
             if (await _mapService.MapSuggestionExists(request.MapId, request.Mod))
@@ -129,9 +121,13 @@ public class RoundController(
     [Authorize]
     public async Task<ActionResult<MapDto>> AddSuggestionToPool(string roundId, [FromBody] PostSuggestionDto request)
     {
-        // TODO Auth stuff
+        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+        var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TournamentId, ["mappooler", "admin", "host"]);
+        if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
         try
         {
+
+
             var map = await _roundService.AddSuggestionToPoolAsync(int.Parse(roundId), request.MapId, request.Mod);
             return Ok(_mapper.Map<MapDto>(map));
         }
@@ -153,10 +149,15 @@ public class RoundController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> RemoveSuggestionFromPool(int roundId, [FromBody] PostSuggestionDto request)
     {
-        // TODO Auth stuff
         if (roundId != request.RoundId) return BadRequest(new ErrorResponse("BadRequest", 400, "RoundId in the path does not match the RoundId in the body"));
+
         try
         {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TournamentId, ["mappooler", "admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+
             await _roundService.RemoveSuggestionFromPoolAsync(roundId, request.MapId, request.Mod);
             return NoContent();
         }
@@ -170,12 +171,29 @@ public class RoundController(
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MapWithStatsDto))]
     public async Task<ActionResult<List<MapWithStatsDto>>> GetStats(int roundId)
     {
-        // var (playerStats, teamStats) = await _roundService.GetStats(roundId);
         var maps = await _roundService.GetMapsAsync(roundId);
-
-
         return Ok(_mapper.Map<List<MapWithStatsDto>>(maps));
 
+    }
+
+    [HttpDelete("{roundId}/delete-suggestion")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<ActionResult> DeleteSuggestion(int roundId, [FromBody] PostSuggestionDto request)
+    {
+        try
+        {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TournamentId, ["mappooler", "admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+            await _roundService.DeleteSuggestionFromRoundAsync(roundId, request.MapId, request.Mod);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("NotFound", 404, e.Message));
+        }
     }
 
 

@@ -9,14 +9,11 @@ using OtmApi.Utils;
 using OtmApi.Utils.Exceptions;
 using OtmApi.Services.StaffService;
 using OtmApi.Services.TournamentService;
-using Newtonsoft.Json;
 using OtmApi.Data.Entities;
 using Microsoft.AspNetCore.RateLimiting;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.MapService;
-using OtmApi.Services.Players;
 using OtmApi.Services.RoundService;
-using AutoMapper.Internal.Mappers;
 
 namespace OtmApi.Controllers;
 
@@ -46,13 +43,13 @@ public class ScheduleController(
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<QualsScheduleDto>))]
     public async Task<ActionResult<List<QualsScheduleDto>>> GenerateQualsScheduleAsync([FromBody] GenQualsRequestDto request)
     {
-        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "User not found"));
-        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
-        if (!await _hostService.HostsTournamentAsync(osuId, request.TournamentId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "User is not authorized to generate schedule for this tournament"));
-
         try
         {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TournamentId, ["admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+
             var res = await _scheduleService.GenerateQualsScheduleAsync(request.TournamentId, request.RoundId, request.StartDate, request.EndDate);
             return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
         }
@@ -79,22 +76,11 @@ public class ScheduleController(
                 return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
             }
 
-
             var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (tokenSub == null)
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tourneyId, ["admin", "host"]);
+            if (!isAuth)
             {
-                res.ForEach(qs => qs.MatchId = null);
-                return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
-            }
-
-            var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
-            var staff = await _staffService.GetByIdAsync(osuId, tourneyId);
-
-            if (!await _tourneyService.StaffsInTourneyAsync(tourneyId, osuId)
-                || !staff.Roles.Any(r => r == "admin" || r == "host"))
-            {
-                res.ForEach(qs => qs.MatchId = null);
-                return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
+                res.ForEach(r => r.MatchId = null);
             }
 
             return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
@@ -113,15 +99,15 @@ public class ScheduleController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<StaffDto>> SetRefereeAsync(int tournamentId, int sheduleId)
     {
-        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
-        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+
         try
         {
-            var staff = await _staffService.GetByIdAsync(osuId, tournamentId);
-            if (!await _tourneyService.StaffsInTourneyAsync(tournamentId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
-            if (!staff.Roles.Contains("referee")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee role"));
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["referee", "admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
 
+
+            var osuId = int.Parse(tokenSub!.Value.Split("|")[2]);
             var addedRef = await _scheduleService.SetQualsRefereeAsync(sheduleId, osuId);
 
 
@@ -141,17 +127,11 @@ public class ScheduleController(
 
     public async Task<ActionResult<QualsSchedulePutDto>> UpdateQualsScheduleAsync(int scheduleId, [FromBody] QualsSchedulePutDto request)
     {
-        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
-        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
         try
         {
-
-
-            var staff = await _staffService.GetByIdAsync(osuId, request.TourneyId);
-            if (!await _tourneyService.StaffsInTourneyAsync(request.TourneyId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
-            if (!staff.Roles.Any(r => r == "referee" || r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the referee or admin role"));
-
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TourneyId, ["referee", "admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
 
             // stats stuff
             if (request.MpLinkId != 0 && request.MpLinkId != null && !await _roundService.StatsForMatchExistAsync((int)request.MpLinkId))
@@ -185,15 +165,13 @@ public class ScheduleController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> QualsScheduleAddExtraAsync([FromBody] QualsScheduleAddExtraDto request)
     {
-        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
-        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+
         try
         {
-            var staff = await _staffService.GetByIdAsync(osuId, request.TourneyId);
-            if (!await _tourneyService.StaffsInTourneyAsync(request.TourneyId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
-            if (!staff.Roles.Any(r => r == "referee" || r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the appropriate role"));
 
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TourneyId, ["referee", "admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
 
             var qs = new QualsSchedule
             {
@@ -218,14 +196,12 @@ public class ScheduleController(
 
     public async Task<ActionResult> HandleMpVisibility(int tournamentId, int roundId)
     {
-        var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-        if (tokenSub == null) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
-        var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+
         try
         {
-            var staff = await _staffService.GetByIdAsync(osuId, tournamentId);
-            if (!await _tourneyService.StaffsInTourneyAsync(tournamentId, osuId)) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You do not staff in this tournament"));
-            if (!staff.Roles.Any(r => r == "admin" || r == "host")) return Unauthorized(new ErrorResponse("Unauthorized", 401, "You don't have the host or admin role"));
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
 
             await _roundService.ChangeMpVisibilityAsync(roundId);
 

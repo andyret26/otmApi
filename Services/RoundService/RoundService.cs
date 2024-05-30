@@ -128,4 +128,15 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         if (r == null) throw new NotFoundException("Round", roundId);
         return r.Mappool!;
     }
+
+    public async Task DeleteSuggestionFromRoundAsync(int roundId, int mapId, string mod)
+    {
+        var r = await _db.Rounds.Include(r => r.MapSuggestions).SingleOrDefaultAsync(r => r.Id == roundId);
+        if (r == null) throw new NotFoundException("Round", roundId);
+        var mIndex = r.MapSuggestions!.FindIndex(m => m.Id == mapId && m.Mod == mod);
+        if (mIndex == -1) throw new NotFoundException("MapSuggestion", mapId);
+        r.MapSuggestions!.RemoveAt(mIndex);
+        await _db.SaveChangesAsync();
+        return;
+    }
 }
