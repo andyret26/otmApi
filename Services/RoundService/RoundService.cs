@@ -17,11 +17,9 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         if (round == null) throw new NotFoundException("Round", roundId);
         if (round.MapSuggestions == null) round.MapSuggestions = new List<TMapSuggestion>();
 
-        var ms = await _db.MapSuggestions.SingleOrDefaultAsync(m => m.Id == mapSuggestion.Id);
+        var ms = await _db.MapSuggestions.SingleOrDefaultAsync(m => m.Id == mapSuggestion.Id && m.Mod == mapSuggestion.Mod);
         if (ms == null) throw new NotFoundException("MapSuggestion", mapSuggestion.Id);
 
-
-        _db.MapSuggestions.Attach(ms);
 
         round.MapSuggestions.Add(ms);
         await _db.SaveChangesAsync();

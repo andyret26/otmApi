@@ -12,6 +12,7 @@ public class MapService(DataContext db) : IMapService
     public async Task<TMapSuggestion> AddMapSuggestion(TMapSuggestion mapSuggestion)
     {
         var addedSuggestion = await _db.MapSuggestions.AddAsync(mapSuggestion);
+        await _db.SaveChangesAsync();
 
         return addedSuggestion.Entity;
     }
@@ -19,7 +20,7 @@ public class MapService(DataContext db) : IMapService
 
     public async Task<TMapSuggestion> GetMapSuggestionAsync(int mapId, string mod)
     {
-        var ms = await _db.MapSuggestions.SingleOrDefaultAsync(s => s.Id == mapId && s.Mod == mod);
+        var ms = await _db.MapSuggestions.FirstOrDefaultAsync(s => s.Id == mapId && s.Mod.Substring(0, 2) == mod.Substring(0, 2));
         if (ms == null) throw new NotFoundException("MapSuggestion", mapId);
         return ms;
 
@@ -27,7 +28,7 @@ public class MapService(DataContext db) : IMapService
 
     public async Task<bool> MapSuggestionExists(int mapId, string mod)
     {
-        return await _db.MapSuggestions.AnyAsync(s => s.Id == mapId && s.Mod == mod);
+        return await _db.MapSuggestions.AnyAsync(s => s.Id == mapId && s.Mod.Substring(0, 2) == mod.Substring(0, 2));
     }
 
     public async Task<List<TMap>> GetMapsByRoundIdAsync(int roundId)

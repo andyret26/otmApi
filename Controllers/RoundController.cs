@@ -92,13 +92,20 @@ public class RoundController(
                 }
 
 
-                if (mapSuggestion.Mod != request.Mod && (request.Mod[..2] == "DT" || request.Mod[..2] == "HR"))
+                if (mapSuggestion.Mod[..2] != request.Mod[..2] && (request.Mod[..2] == "DT" || request.Mod[..2] == "HR"))
                 {
                     var attributes = await _osuApiService.GetBeatmapAttributesAsync(mapSuggestion.Id, request.Mod[..2]);
                     AttributeCalculate(mapSuggestion, attributes, request.Mod);
 
                 }
             }
+
+            if (mapSuggestion.Id == request.MapId && mapSuggestion.Mod == request.Mod)
+            {
+                await _roundService.AddSuggestionToRound(roundId, mapSuggestion);
+                return Ok(_mapper.Map<MapSuggestionDto>(mapSuggestion));
+            }
+
             mapSuggestion.Mod = request.Mod;
             mapSuggestion.Notes = request.Notes;
 
@@ -202,9 +209,9 @@ public class RoundController(
         mapSuggestion.Difficulty_rating = attributes.Star_rating;
         mapSuggestion.Ar = attributes.Approach_rate;
         mapSuggestion.Accuracy = attributes.Overall_difficulty;
-        mapSuggestion.Bpm = mod == "DT" ? (decimal)1.5 * mapSuggestion.Bpm : mapSuggestion.Bpm;
-        mapSuggestion.Total_length = mod == "DT" ? mapSuggestion.Total_length / (decimal)1.5 : mapSuggestion.Total_length;
-        mapSuggestion.Cs = mod == "HR" ? (decimal)1.3 * mapSuggestion.Cs : mapSuggestion.Cs;
+        mapSuggestion.Bpm = mod[..2] == "DT" ? (decimal)1.5 * mapSuggestion.Bpm : mapSuggestion.Bpm;
+        mapSuggestion.Total_length = mod[..2] == "DT" ? mapSuggestion.Total_length / (decimal)1.5 : mapSuggestion.Total_length;
+        mapSuggestion.Cs = mod[..2] == "HR" ? (decimal)1.3 * mapSuggestion.Cs : mapSuggestion.Cs;
         if (mapSuggestion.Cs > 10) mapSuggestion.Cs = 10;
     }
 }

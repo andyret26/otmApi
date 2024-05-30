@@ -312,7 +312,7 @@ class OsuApiService : IOsuApiService
             _ => 0
         };
 
-        var postBody = new { mods = modInt, ruleset = "osu" };
+        var postBody = new { mods = modInt, ruleset_id = 0 };
 
         // Serialize the postBody to JSON
         string json = JsonConvert.SerializeObject(postBody);
