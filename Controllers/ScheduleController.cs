@@ -63,16 +63,42 @@ public class ScheduleController(
         }
     }
 
-    [HttpGet("qualifier/{roundId}")]
+    [HttpGet("tournament/{tourneyId}/qualifier/{roundId}")]
 
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<QualsScheduleDto>))]
 
-    public async Task<ActionResult<List<QualsScheduleDto>>> GetQualsScheduleAsync([FromRoute] int roundId)
+    public async Task<ActionResult<List<QualsScheduleDto>>> GetQualsScheduleAsync(int tourneyId, [FromRoute] int roundId)
     {
+
         try
         {
+            var round = await _roundService.GetRoundByIdAsync(roundId);
             var res = await _scheduleService.GetQualsScheduleAsync(roundId);
+            if (round.IsMpLinksPublic)
+            {
+                return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
+            }
+
+
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (tokenSub == null)
+            {
+                res.ForEach(qs => qs.MatchId = null);
+                return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
+            }
+
+            var osuId = int.Parse(tokenSub.Value.Split("|")[2]);
+            var staff = await _staffService.GetByIdAsync(osuId, tourneyId);
+
+            if (!await _tourneyService.StaffsInTourneyAsync(tourneyId, osuId)
+                || !staff.Roles.Any(r => r == "admin" || r == "host"))
+            {
+                res.ForEach(qs => qs.MatchId = null);
+                return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
+            }
+
             return Ok(_mapper.Map<List<QualsScheduleDto>>(res));
+
         }
         catch (NotFoundException e)
         {
