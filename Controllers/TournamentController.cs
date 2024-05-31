@@ -282,8 +282,6 @@ public class TournamentController(
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-
-
     public async Task<ActionResult> DeleteTournament(int tournamentId)
     {
         var tokenId = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -296,6 +294,27 @@ public class TournamentController(
             if (osuId != t.HostId) return Unauthorized(new ErrorResponse("Unauthorized", 401, "Unauthorized"));
             await _tourneyService.DeleteAsync(tournamentId);
             return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+    }
+
+    [HttpPost("{tournamentId}/is-authorized")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(bool))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<bool>> IsStaff(int tournamentId, [FromBody] IsStaffRequest req)
+
+    {
+        try
+        {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, req.Roles);
+            if (!isAuth) return Ok(false);
+            return Ok(true);
+
         }
         catch (NotFoundException e)
         {

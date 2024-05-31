@@ -42,3 +42,9 @@ public class TournamentPlayerDto
     public int TournamentId { get; set; }
     public bool Isknockout { get; set; } = false;
 }
+
+public class IsStaffRequest
+{
+    public int TournamentId { get; set; }
+    public string[] Roles { get; set; } = null!;
+}
