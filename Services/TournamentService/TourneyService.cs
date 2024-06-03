@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OtmApi.Data;
+using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
 using OtmApi.Utils.Exceptions;
 
@@ -155,5 +156,57 @@ public class TourneyService(DataContext db) : ITourneyService
         var t = await _db.Tournaments.SingleOrDefaultAsync(t => t.Id == tournamentId);
         if (t == null) throw new NotFoundException("Tournament", tournamentId);
         return t.IsTeamTourney;
+    }
+
+    public async Task SetPlayerSeedsAsync(int tournamentId, List<TournamentPlayerDto> players)
+    {
+        var t = await _db.Tournaments.Include(t => t.Players).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        foreach (var player in players)
+        {
+            var tp = t.Players!.SingleOrDefault(tp => tp.PlayerId == player.PlayerId);
+            if (tp == null) throw new NotFoundException("Player", player.PlayerId);
+            tp.Seed = player.Seed;
+        }
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task SetTeamSeedsAsync(int tournamentId, List<TeamWithoutPlayerDto> teams)
+    {
+        var t = await _db.Tournaments.Include(t => t.Teams).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        foreach (var team in teams)
+        {
+            var tt = t.Teams!.SingleOrDefault(tt => tt.Id == team.Id);
+            if (tt == null) throw new NotFoundException("Team", team.Id);
+            tt.Seed = team.Seed;
+        }
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task KnockoutPlayersAsync(int tournamentId, List<int> playerIds)
+    {
+        var t = await _db.Tournaments.Include(t => t.Players).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        foreach (var playerId in playerIds)
+        {
+            var tp = t.Players!.SingleOrDefault(tp => tp.PlayerId == playerId);
+            if (tp == null) throw new NotFoundException("Player", playerId);
+            tp.Isknockout = true;
+        }
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task KnockoutTeamsAsync(int tournamentId, List<int> teamIds)
+    {
+        var t = await _db.Tournaments.Include(t => t.Teams).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        foreach (var teamId in teamIds)
+        {
+            var tt = t.Teams!.SingleOrDefault(tt => tt.Id == teamId);
+            if (tt == null) throw new NotFoundException("Team", teamId);
+            tt.Isknockout = true;
+        }
+        await _db.SaveChangesAsync();
     }
 }

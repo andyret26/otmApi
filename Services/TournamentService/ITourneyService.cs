@@ -1,3 +1,4 @@
+using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
 
 namespace OtmApi.Services.TournamentService;
@@ -41,4 +42,9 @@ public interface ITourneyService
     public Task<List<Team>> GetAllTeamsAsync(int tournamentId);
     public Task<List<Staff>> GetAllStaffsAsync(int tournamentId);
     public Task<bool> IsTeamTourneyAsync(int tournamentId);
+
+    public Task SetPlayerSeedsAsync(int tournamentId, List<TournamentPlayerDto> players);
+    public Task SetTeamSeedsAsync(int tournamentId, List<TeamWithoutPlayerDto> teams);
+    public Task KnockoutPlayersAsync(int tournamentId, List<int> playerIds);
+    public Task KnockoutTeamsAsync(int tournamentId, List<int> teamIds);
 }

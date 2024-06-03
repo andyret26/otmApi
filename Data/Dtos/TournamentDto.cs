@@ -42,10 +42,18 @@ public class TournamentPlayerDto
     public int PlayerId { get; set; }
     public int TournamentId { get; set; }
     public bool Isknockout { get; set; } = false;
+    public int? Seed { get; set; }
 }
 
 public class IsStaffRequest
 {
     public int TournamentId { get; set; }
     public string[] Roles { get; set; } = null!;
+}
+
+public class SetSeedReq
+{
+    public bool IsTeamTourney { get; set; }
+    public List<TournamentPlayerDto>? PlayerSeeds { get; set; }
+    public List<TeamWithoutPlayerDto>? TeamSeeds { get; set; }
 }

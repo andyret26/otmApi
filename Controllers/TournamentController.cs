@@ -322,4 +322,40 @@ public class TournamentController(
         }
     }
 
+    [HttpPost("{tournamentId}/set-seed")]
+    public async Task<ActionResult> SetSeed(int tournamentId, [FromBody] SetSeedReq req)
+    {
+        try
+        {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+            if (req.IsTeamTourney)
+            {
+                await _tourneyService.SetTeamSeedsAsync(tournamentId, req.TeamSeeds!);
+            }
+            else
+            {
+                await _tourneyService.SetPlayerSeedsAsync(tournamentId, req.PlayerSeeds!);
+            }
+
+
+        }
+        catch (System.Exception)
+        {
+
+            throw;
+        }
+
+        return Ok();
+    }
+
+    // TODO
+    // [HttpPost("{tournamentId}/knockout")]
+    // public async Task<ActionResult> Knockout(int tournamentId, [FromBody] KnockoutReq req)
+    // {
+    //     return Ok();
+    // }
+
 }
