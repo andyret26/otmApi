@@ -11,6 +11,7 @@ public class Tournament
     public string Format { get; set; } = null!;
     public int MaxTeamSize { get; set; }
     public string RankRange { get; set; } = null!;
+    public string? HowManyQualifies { get; set; }
 
 
 
