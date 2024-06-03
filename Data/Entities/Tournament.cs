@@ -30,6 +30,7 @@ public class Team
     public List<Player>? Players { get; set; }
     public List<TeamStats>? TeamStats { get; set; }
     public bool Isknockout { get; set; }
+    public int? Seed { get; set; }
 }
 
 
@@ -41,4 +42,5 @@ public class TournamentPlayer
     public Tournament Tournament { get; set; } = null!;
 
     public bool Isknockout { get; set; } = false;
+    public int? Seed { get; set; }
 }
