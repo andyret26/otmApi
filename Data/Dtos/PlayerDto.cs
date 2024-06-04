@@ -23,3 +23,9 @@ public class PlayerMinWithTournamnetsDto
     public List<TournamentPlayerDto> Tournaments { get; set; } = null!;
 
 }
+
+public class PlayerSeedDto
+{
+    public int Id { get; set; }
+    public int Seed { get; set; }
+}

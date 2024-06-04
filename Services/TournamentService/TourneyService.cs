@@ -158,20 +158,20 @@ public class TourneyService(DataContext db) : ITourneyService
         return t.IsTeamTourney;
     }
 
-    public async Task SetPlayerSeedsAsync(int tournamentId, List<TournamentPlayerDto> players)
+    public async Task SetPlayerSeedsAsync(int tournamentId, List<PlayerSeedDto> players)
     {
         var t = await _db.Tournaments.Include(t => t.Players).SingleOrDefaultAsync(t => t.Id == tournamentId);
         if (t == null) throw new NotFoundException("Tournament", tournamentId);
         foreach (var player in players)
         {
-            var tp = t.Players!.SingleOrDefault(tp => tp.PlayerId == player.PlayerId);
-            if (tp == null) throw new NotFoundException("Player", player.PlayerId);
+            var tp = t.Players!.SingleOrDefault(tp => tp.PlayerId == player.Id);
+            if (tp == null) throw new NotFoundException("Player", player.Id);
             tp.Seed = player.Seed;
         }
         await _db.SaveChangesAsync();
     }
 
-    public async Task SetTeamSeedsAsync(int tournamentId, List<TeamWithoutPlayerDto> teams)
+    public async Task SetTeamSeedsAsync(int tournamentId, List<TeamSeedDto> teams)
     {
         var t = await _db.Tournaments.Include(t => t.Teams).SingleOrDefaultAsync(t => t.Id == tournamentId);
         if (t == null) throw new NotFoundException("Tournament", tournamentId);
@@ -188,11 +188,10 @@ public class TourneyService(DataContext db) : ITourneyService
     {
         var t = await _db.Tournaments.Include(t => t.Players).SingleOrDefaultAsync(t => t.Id == tournamentId);
         if (t == null) throw new NotFoundException("Tournament", tournamentId);
-        foreach (var playerId in playerIds)
+        foreach (var player in t.Players!)
         {
-            var tp = t.Players!.SingleOrDefault(tp => tp.PlayerId == playerId);
-            if (tp == null) throw new NotFoundException("Player", playerId);
-            tp.Isknockout = true;
+            if (playerIds.Contains(player.PlayerId)) player.Isknockout = true;
+            else player.Isknockout = false;
         }
         await _db.SaveChangesAsync();
     }
@@ -201,12 +200,19 @@ public class TourneyService(DataContext db) : ITourneyService
     {
         var t = await _db.Tournaments.Include(t => t.Teams).SingleOrDefaultAsync(t => t.Id == tournamentId);
         if (t == null) throw new NotFoundException("Tournament", tournamentId);
-        foreach (var teamId in teamIds)
+        foreach (var team in t.Teams!)
         {
-            var tt = t.Teams!.SingleOrDefault(tt => tt.Id == teamId);
-            if (tt == null) throw new NotFoundException("Team", teamId);
-            tt.Isknockout = true;
+            if (teamIds.Contains(team.Id)) team.Isknockout = true;
+            else team.Isknockout = false;
         }
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task SetHowManyQualifiesAsync(int tournamentId, string howManyQualifies)
+    {
+        var t = await _db.Tournaments.SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        t.HowManyQualifies = howManyQualifies;
         await _db.SaveChangesAsync();
     }
 }

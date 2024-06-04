@@ -43,8 +43,9 @@ public interface ITourneyService
     public Task<List<Staff>> GetAllStaffsAsync(int tournamentId);
     public Task<bool> IsTeamTourneyAsync(int tournamentId);
 
-    public Task SetPlayerSeedsAsync(int tournamentId, List<TournamentPlayerDto> players);
-    public Task SetTeamSeedsAsync(int tournamentId, List<TeamWithoutPlayerDto> teams);
+    public Task SetPlayerSeedsAsync(int tournamentId, List<PlayerSeedDto> players);
+    public Task SetTeamSeedsAsync(int tournamentId, List<TeamSeedDto> teams);
+    public Task SetHowManyQualifiesAsync(int tournamentId, string howManyQualifies);
     public Task KnockoutPlayersAsync(int tournamentId, List<int> playerIds);
     public Task KnockoutTeamsAsync(int tournamentId, List<int> teamIds);
 }

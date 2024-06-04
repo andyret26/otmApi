@@ -14,3 +14,9 @@ public class TeamWithoutPlayerDto
     public bool Isknockout { get; set; }
     public int? Seed { get; set; }
 }
+
+public class TeamSeedDto
+{
+    public int Id { get; set; }
+    public int Seed { get; set; }
+}

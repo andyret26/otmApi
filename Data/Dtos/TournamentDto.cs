@@ -54,6 +54,15 @@ public class IsStaffRequest
 public class SetSeedReq
 {
     public bool IsTeamTourney { get; set; }
-    public List<TournamentPlayerDto>? PlayerSeeds { get; set; }
-    public List<TeamWithoutPlayerDto>? TeamSeeds { get; set; }
+    public List<PlayerSeedDto>? PlayerSeeds { get; set; }
+    public List<TeamSeedDto>? TeamSeeds { get; set; }
+    public string HowManyQualifies { get; set; } = null!;
+}
+
+public class KnockoutReq
+{
+    public int TournamentId { get; set; }
+    public bool IsTeamTourney { get; set; }
+    public List<int>? PlayerIds { get; set; } = null!;
+    public List<int>? TeamIds { get; set; } = null!;
 }

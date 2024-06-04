@@ -323,6 +323,7 @@ public class TournamentController(
     }
 
     [HttpPost("{tournamentId}/set-seed")]
+    [Authorize]
     public async Task<ActionResult> SetSeed(int tournamentId, [FromBody] SetSeedReq req)
     {
         try
@@ -339,23 +340,41 @@ public class TournamentController(
             {
                 await _tourneyService.SetPlayerSeedsAsync(tournamentId, req.PlayerSeeds!);
             }
-
-
+            await _tourneyService.SetHowManyQualifiesAsync(tournamentId, req.HowManyQualifies);
+            return Ok();
         }
-        catch (System.Exception)
+        catch (NotFoundException e)
         {
-
-            throw;
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
         }
 
-        return Ok();
     }
 
-    // TODO
-    // [HttpPost("{tournamentId}/knockout")]
-    // public async Task<ActionResult> Knockout(int tournamentId, [FromBody] KnockoutReq req)
-    // {
-    //     return Ok();
-    // }
+    [HttpPost("{tournamentId}/knockout")]
+    [Authorize]
+    public async Task<ActionResult> Knockout(int tournamentId, [FromBody] KnockoutReq req)
+    {
+        try
+        {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+            if (req.IsTeamTourney)
+            {
+                await _tourneyService.KnockoutTeamsAsync(tournamentId, req.TeamIds!);
+            }
+            else
+            {
+                await _tourneyService.KnockoutPlayersAsync(tournamentId, req.PlayerIds!);
+            }
+            return Ok();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
+        }
+
+    }
 
 }
