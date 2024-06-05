@@ -104,6 +104,15 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         return round.IsMpLinksPublic;
     }
 
+    public async Task<bool> ChangeStatsVisibilityAsync(int roundId)
+    {
+        var round = await _db.Rounds.SingleOrDefaultAsync(r => r.Id == roundId);
+        if (round == null) throw new NotFoundException("Round", roundId);
+        round.IsStatsPublic = !round.IsStatsPublic;
+        await _db.SaveChangesAsync();
+        return round.IsStatsPublic;
+    }
+
     public async Task<(List<PlayerStats>, List<TeamStats>)> GetStats(int roundId)
     {
         var pStats = await _db.PlayerStats.Where(s => s.RoundId == roundId).ToListAsync();
@@ -137,4 +146,6 @@ public class RoundService(DataContext db, IMapper mapper) : IRoundService
         await _db.SaveChangesAsync();
         return;
     }
+
+
 }

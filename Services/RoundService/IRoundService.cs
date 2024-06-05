@@ -13,6 +13,7 @@ public interface IRoundService
     public Task<List<TeamStats>> AddTeamStatsAsync(List<TeamStats> stats);
     public Task<bool> StatsForMatchExistAsync(int matchId);
     public Task<bool> ChangeMpVisibilityAsync(int roundId);
+    public Task<bool> ChangeStatsVisibilityAsync(int roundId);
     public Task<(List<PlayerStats>, List<TeamStats>)> GetStats(int roundId);
     public Task<List<TMap>> GetMapsAsync(int roundId);
 }

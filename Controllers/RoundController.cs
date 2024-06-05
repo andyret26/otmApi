@@ -203,6 +203,28 @@ public class RoundController(
         }
     }
 
+    [HttpPut("{roundId}/tournament/{tournamentId}/stats-visibility")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+
+    public async Task<ActionResult> ChangeStatsVisibility(int roundId, int tournamentId)
+    {
+        try
+        {
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+            await _roundService.ChangeStatsVisibilityAsync(roundId);
+            return NoContent();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("NotFound", 404, e.Message));
+        }
+
+    }
+
 
     private static void AttributeCalculate(TMapSuggestion mapSuggestion, Attributes attributes, string mod)
     {
