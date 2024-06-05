@@ -16,6 +16,7 @@ public class TournamentDto
     public List<TeamDto>? Teams { get; set; }
     public List<StaffDto>? Staff { get; set; }
 }
+
 public class TournamentSimpleDto
 {
     public int Id { get; set; }
@@ -40,6 +41,7 @@ public class StaffDto
 public class TournamentPlayerDto
 {
     public int PlayerId { get; set; }
+    public PlayerDto Player { get; set; } = null!;
     public int TournamentId { get; set; }
     public bool Isknockout { get; set; } = false;
     public int? Seed { get; set; }
