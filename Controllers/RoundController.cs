@@ -160,8 +160,8 @@ public class RoundController(
 
         try
         {
-            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, request.TournamentId, ["mappooler", "admin", "host"]);
+            var userTokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(userTokenSub, _staffService, _tourneyService, request.TournamentId, ["mappooler", "admin", "host"]);
             if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
 
 

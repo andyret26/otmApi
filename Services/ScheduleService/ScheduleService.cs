@@ -45,8 +45,11 @@ public class ScheduleService(DataContext db) : IScheduleService
         return resReturn;
     }
 
-    public Task<List<Schedule>> GenerateScheduleAsync(int tournamentId, int RoundId)
+    public Task<List<Schedule>> GenerateScheduleAsync(int tournamentId, int RoundId, DateTime startDate, DateTime endDate)
     {
+        // TODO
+        // for winner bracket get TournamentPlayers where tournamnt , isKnockedOut = false, seed != null is Knocked down = fasle
+        // for loser bracketget TournamentPlayers where tournamnt , isKnockedOut = false, seed != null is Knocked down = true
         throw new NotImplementedException();
     }
 

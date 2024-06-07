@@ -10,6 +10,7 @@ public class Round
     public bool IsQualifier { get; set; } = false;
     public List<TMap>? Mappool { get; set; }
     public List<TMapSuggestion>? MapSuggestions { get; set; }
+    public List<Schedule> Schedules { get; set; } = null!;
     public int TournamentId { get; set; }
     public Tournament Tournament { get; set; } = null!;
     public bool IsMpLinksPublic { get; set; } = false;

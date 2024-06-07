@@ -7,6 +7,7 @@ public class RoundDto
     public bool IsQualifier { get; set; }
     public bool IsMpLinksPublic { get; set; }
     public bool IsStatsPublic { get; set; }
+    public int TournamentId { get; set; }
 }
 
 public class RoundPostDto
