@@ -215,25 +215,25 @@ public class ScheduleController(
 
     //TODO
 
-    // [HttpPost("tournament/{tournamentId}/round/{roundId}/generate-schedule")]
-    // [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ScheduleDto>))]
+    [HttpPost("tournament/{tournamentId}/round/{roundId}/generate-schedule")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ScheduleDto>))]
 
-    // public async Task<ActionResult<List<ScheduleDto>>>
-    // GenerateScheduleAsync(int tournamentId, int roundId, [FromBody] GenQualsRequestDto request)
-    // {
-    //     try
-    //     {
-    //         var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-    //         var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
-    //         if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
-
-    //         return Ok();
-    //     }
-    //     catch (AlreadyExistException e)
-    //     {
-    //         return Conflict(new ErrorResponse("Conflict", 409, e.Message));
-    //     }
-    // }
+    public async Task<ActionResult<List<ScheduleDto>>>
+    GenerateScheduleAsync(int tournamentId, int roundId, [FromBody] GenQualsRequestDto request)
+    {
+        try
+        {
+            // var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            // var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
+            // if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+            var res = await _scheduleService.GenerateScheduleAsync(tournamentId, roundId, request.StartDate, request.EndDate);
+            return Ok(_mapper.Map<List<ScheduleDto>>(res));
+        }
+        catch (AlreadyExistException e)
+        {
+            return Conflict(new ErrorResponse("Conflict", 409, e.Message));
+        }
+    }
 
 
 

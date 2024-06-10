@@ -58,6 +58,7 @@ public class ScheduleDto
     public int? Score2 { get; set; }
     public string? Winner { get; set; }
     public string? Loser { get; set; }
+    public bool IsInLosersBracket { get; set; }
 
     public int? MpLinkId { get; set; }
 }
