@@ -28,6 +28,7 @@ public class Team
 {
     public int Id { get; set; }
     public int TournamentId { get; set; }
+    public Tournament Tournament { get; set; } = null!;
     public string TeamName { get; set; } = null!;
     public List<Player>? Players { get; set; }
     public List<TeamStats>? TeamStats { get; set; }

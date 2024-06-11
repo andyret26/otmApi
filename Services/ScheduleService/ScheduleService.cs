@@ -184,6 +184,7 @@ public class ScheduleService(DataContext db) : IScheduleService
                 }
                 else
                 {
+                    var winnerIndex = (previousRoundSchedules.Count / 2) + (i % (previousRoundSchedules.Count / 4));
                     loserBracketscheduleList.Add(new Schedule
                     {
                         DateTime = Functions.RoundToNearestHour(Functions.GetRandomeDate(startDate, endDate)),
@@ -192,11 +193,28 @@ public class ScheduleService(DataContext db) : IScheduleService
                         Round = round,
                         RoundNumber = previousRoundSchedules[0].RoundNumber + 1,
                         Name1 = previousRoundSchedules[i].Loser,
-                        // TODO: Fix this, how to get looser from 1(wb) and winner from 7 (lb)
-                        Name2 = previousRoundSchedules[i].Winner,
+                        Name2 = previousRoundSchedules[winnerIndex].Winner,
 
                         IsInLosersBracket = true
                     });
+
+                    var c = loserBracketscheduleList.Count;
+                    for (int j = 0; j < c / 2; j++)
+                    {
+                        loserBracketscheduleList.Add(new Schedule
+                        {
+                            DateTime = new DateTime(2000, 01, 01),
+                            Num = winnerBracketscheduleList.Count + 1 + i,
+                            RoundId = RoundId,
+                            Round = round,
+                            RoundNumber = previousRoundSchedules[0].RoundNumber + 1,
+                            Name1 = previousRoundSchedules[j].Winner,
+                            Name2 = previousRoundSchedules[^(j + 1)].Winner,
+
+                            IsInLosersBracket = true
+                        });
+
+                    }
                 }
             }
 

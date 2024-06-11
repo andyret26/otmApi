@@ -13,8 +13,8 @@ using OtmApi.Data;
 namespace otmApi.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240503083055_is_knocked_out")]
-    partial class is_knocked_out
+    [Migration("20240611080224_INIT")]
+    partial class INIT
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,50 +74,7 @@ namespace otmApi.Migrations
                     b.ToTable("Players");
                 });
 
-            modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("TournamentId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TournamentId");
-
-                    b.ToTable("Rounds");
-                });
-
-            modelBuilder.Entity("OtmApi.Data.Entities.Staff", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<List<string>>("Roles")
-                        .IsRequired()
-                        .HasColumnType("text[]");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Staff");
-                });
-
-            modelBuilder.Entity("OtmApi.Data.Entities.Stats", b =>
+            modelBuilder.Entity("OtmApi.Data.Entities.PlayerStats", b =>
                 {
                     b.Property<int>("MapId")
                         .HasColumnType("integer");
@@ -135,6 +92,9 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("MatchId")
+                        .HasColumnType("integer");
+
                     b.Property<List<string>>("Mods")
                         .HasColumnType("text[]");
 
@@ -149,7 +109,155 @@ namespace otmApi.Migrations
 
                     b.HasIndex("MapId", "MapMod");
 
-                    b.ToTable("Stats");
+                    b.ToTable("PlayerStats");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.QualsSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("MatchId")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("Names")
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Num")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Referee")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RoundId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoundId");
+
+                    b.ToTable("QualsSchedules");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsMpLinksPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsQualifier")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsStatsPublic")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TournamentId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TournamentId");
+
+                    b.ToTable("Rounds");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Schedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<List<string>>("Commentators")
+                        .HasColumnType("text[]");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsInLosersBracket")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Loser")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("MpLinkId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name1")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name2")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Num")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Referee")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RoundId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoundNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Score1")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Score2")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Streamer")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Winner")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoundId");
+
+                    b.ToTable("Schedules");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Staff", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TournamentId")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("Roles")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id", "TournamentId");
+
+                    b.HasIndex("TournamentId");
+
+                    b.ToTable("Staff");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TMap", b =>
@@ -280,21 +388,65 @@ namespace otmApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsKnockedDown")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("Isknockout")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("Seed")
+                        .HasColumnType("integer");
 
                     b.Property<string>("TeamName")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("TournamentId")
+                    b.Property<int>("TournamentId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TournamentId");
 
-                    b.ToTable("Team");
+                    b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.TeamStats", b =>
+                {
+                    b.Property<int>("MapId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoundId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Acc")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("AvgScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("MapMod")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalScore")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MapId", "TeamId", "RoundId");
+
+                    b.HasIndex("RoundId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("MapId", "MapMod");
+
+                    b.ToTable("TeamStats");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Tournament", b =>
@@ -314,6 +466,9 @@ namespace otmApi.Migrations
 
                     b.Property<int>("HostId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("HowManyQualifies")
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsTeamTourney")
                         .HasColumnType("boolean");
@@ -344,8 +499,14 @@ namespace otmApi.Migrations
                     b.Property<int>("TournamentId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsKnockedDown")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("Isknockout")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("Seed")
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TournamentId");
 
@@ -405,33 +566,7 @@ namespace otmApi.Migrations
                     b.ToTable("RoundMapSuggestion", (string)null);
                 });
 
-            modelBuilder.Entity("StaffTournament", b =>
-                {
-                    b.Property<int>("StaffId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TournamentsId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("StaffId", "TournamentsId");
-
-                    b.HasIndex("TournamentsId");
-
-                    b.ToTable("TournamentStaff", (string)null);
-                });
-
-            modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
-                {
-                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
-                        .WithMany("Rounds")
-                        .HasForeignKey("TournamentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tournament");
-                });
-
-            modelBuilder.Entity("OtmApi.Data.Entities.Stats", b =>
+            modelBuilder.Entity("OtmApi.Data.Entities.PlayerStats", b =>
                 {
                     b.HasOne("OtmApi.Data.Entities.Player", "Player")
                         .WithMany("Stats")
@@ -446,7 +581,7 @@ namespace otmApi.Migrations
                         .IsRequired();
 
                     b.HasOne("OtmApi.Data.Entities.TMap", "Map")
-                        .WithMany("Stats")
+                        .WithMany("PlayerStats")
                         .HasForeignKey("MapId", "MapMod")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -458,11 +593,86 @@ namespace otmApi.Migrations
                     b.Navigation("Round");
                 });
 
+            modelBuilder.Entity("OtmApi.Data.Entities.QualsSchedule", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Round", "Round")
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
+                        .WithMany("Rounds")
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tournament");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Schedule", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Round", "Round")
+                        .WithMany("Schedules")
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Round");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Staff", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
+                        .WithMany("Staff")
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tournament");
+                });
+
             modelBuilder.Entity("OtmApi.Data.Entities.Team", b =>
                 {
-                    b.HasOne("OtmApi.Data.Entities.Tournament", null)
+                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
                         .WithMany("Teams")
-                        .HasForeignKey("TournamentId");
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tournament");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.TeamStats", b =>
+                {
+                    b.HasOne("OtmApi.Data.Entities.Round", "Round")
+                        .WithMany()
+                        .HasForeignKey("RoundId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OtmApi.Data.Entities.Team", "Team")
+                        .WithMany("TeamStats")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("OtmApi.Data.Entities.TMap", "Map")
+                        .WithMany("TeamStats")
+                        .HasForeignKey("MapId", "MapMod")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Map");
+
+                    b.Navigation("Round");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Tournament", b =>
@@ -540,21 +750,6 @@ namespace otmApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StaffTournament", b =>
-                {
-                    b.HasOne("OtmApi.Data.Entities.Staff", null)
-                        .WithMany()
-                        .HasForeignKey("StaffId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("OtmApi.Data.Entities.Tournament", null)
-                        .WithMany()
-                        .HasForeignKey("TournamentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("OtmApi.Data.Entities.Host", b =>
                 {
                     b.Navigation("Tournaments");
@@ -567,9 +762,21 @@ namespace otmApi.Migrations
                     b.Navigation("Tournaments");
                 });
 
+            modelBuilder.Entity("OtmApi.Data.Entities.Round", b =>
+                {
+                    b.Navigation("Schedules");
+                });
+
             modelBuilder.Entity("OtmApi.Data.Entities.TMap", b =>
                 {
-                    b.Navigation("Stats");
+                    b.Navigation("PlayerStats");
+
+                    b.Navigation("TeamStats");
+                });
+
+            modelBuilder.Entity("OtmApi.Data.Entities.Team", b =>
+                {
+                    b.Navigation("TeamStats");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.Tournament", b =>
@@ -577,6 +784,8 @@ namespace otmApi.Migrations
                     b.Navigation("Players");
 
                     b.Navigation("Rounds");
+
+                    b.Navigation("Staff");
 
                     b.Navigation("Teams");
                 });

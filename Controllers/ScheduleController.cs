@@ -216,6 +216,7 @@ public class ScheduleController(
     //TODO
 
     [HttpPost("tournament/{tournamentId}/round/{roundId}/generate-schedule")]
+    // [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ScheduleDto>))]
 
     public async Task<ActionResult<List<ScheduleDto>>>

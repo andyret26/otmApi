@@ -188,6 +188,9 @@ namespace otmApi.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<bool>("IsInLosersBracket")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Loser")
                         .HasColumnType("text");
 
@@ -395,14 +398,14 @@ namespace otmApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("TournamentId")
+                    b.Property<int>("TournamentId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("TournamentId");
 
-                    b.ToTable("Team");
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TeamStats", b =>
@@ -633,9 +636,13 @@ namespace otmApi.Migrations
 
             modelBuilder.Entity("OtmApi.Data.Entities.Team", b =>
                 {
-                    b.HasOne("OtmApi.Data.Entities.Tournament", null)
+                    b.HasOne("OtmApi.Data.Entities.Tournament", "Tournament")
                         .WithMany("Teams")
-                        .HasForeignKey("TournamentId");
+                        .HasForeignKey("TournamentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tournament");
                 });
 
             modelBuilder.Entity("OtmApi.Data.Entities.TeamStats", b =>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -7,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace otmApi.Migrations
 {
     /// <inheritdoc />
-    public partial class INTI : Migration
+    public partial class INIT : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -62,15 +63,15 @@ namespace otmApi.Migrations
                     Name = table.Column<string>(type: "text", nullable: false),
                     Artist = table.Column<string>(type: "text", nullable: false),
                     Version = table.Column<string>(type: "text", nullable: false),
-                    Sr = table.Column<decimal>(type: "numeric", nullable: false),
-                    Bpm = table.Column<int>(type: "integer", nullable: false),
-                    Length = table.Column<decimal>(type: "numeric", nullable: false),
+                    Difficulty_rating = table.Column<decimal>(type: "numeric", nullable: false),
+                    Bpm = table.Column<decimal>(type: "numeric", nullable: false),
+                    Total_length = table.Column<decimal>(type: "numeric", nullable: false),
                     Cs = table.Column<decimal>(type: "numeric", nullable: false),
                     Ar = table.Column<decimal>(type: "numeric", nullable: false),
-                    Od = table.Column<decimal>(type: "numeric", nullable: false),
+                    Accuracy = table.Column<decimal>(type: "numeric", nullable: false),
                     Mapper = table.Column<string>(type: "text", nullable: false),
-                    Notes = table.Column<string>(type: "text", nullable: true),
-                    Link = table.Column<string>(type: "text", nullable: true)
+                    Url = table.Column<string>(type: "text", nullable: false),
+                    Notes = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -95,20 +96,6 @@ namespace otmApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Staff",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Username = table.Column<string>(type: "text", nullable: false),
-                    Roles = table.Column<List<string>>(type: "text[]", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Staff", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Tournaments",
                 columns: table => new
                 {
@@ -120,6 +107,7 @@ namespace otmApi.Migrations
                     Format = table.Column<string>(type: "text", nullable: false),
                     MaxTeamSize = table.Column<int>(type: "integer", nullable: false),
                     RankRange = table.Column<string>(type: "text", nullable: false),
+                    HowManyQualifies = table.Column<string>(type: "text", nullable: true),
                     HostId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -140,7 +128,10 @@ namespace otmApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    TournamentId = table.Column<int>(type: "integer", nullable: false)
+                    IsQualifier = table.Column<bool>(type: "boolean", nullable: false),
+                    TournamentId = table.Column<int>(type: "integer", nullable: false),
+                    IsMpLinksPublic = table.Column<bool>(type: "boolean", nullable: false),
+                    IsStatsPublic = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -154,68 +145,131 @@ namespace otmApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Team",
+                name: "Staff",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    TournamentId = table.Column<int>(type: "integer", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
+                    Roles = table.Column<List<string>>(type: "text[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Staff", x => new { x.Id, x.TournamentId });
+                    table.ForeignKey(
+                        name: "FK_Staff_Tournaments_TournamentId",
+                        column: x => x.TournamentId,
+                        principalTable: "Tournaments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Teams",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TournamentId = table.Column<int>(type: "integer", nullable: false),
                     TeamName = table.Column<string>(type: "text", nullable: false),
-                    TournamentId = table.Column<int>(type: "integer", nullable: true)
+                    Isknockout = table.Column<bool>(type: "boolean", nullable: false),
+                    IsKnockedDown = table.Column<bool>(type: "boolean", nullable: false),
+                    Seed = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Team", x => x.Id);
+                    table.PrimaryKey("PK_Teams", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Team_Tournaments_TournamentId",
+                        name: "FK_Teams_Tournaments_TournamentId",
                         column: x => x.TournamentId,
                         principalTable: "Tournaments",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TournamentPlayer",
                 columns: table => new
                 {
-                    PlayersId = table.Column<int>(type: "integer", nullable: false),
-                    TournamentsId = table.Column<int>(type: "integer", nullable: false)
+                    PlayerId = table.Column<int>(type: "integer", nullable: false),
+                    TournamentId = table.Column<int>(type: "integer", nullable: false),
+                    Isknockout = table.Column<bool>(type: "boolean", nullable: false),
+                    IsKnockedDown = table.Column<bool>(type: "boolean", nullable: false),
+                    Seed = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TournamentPlayer", x => new { x.PlayersId, x.TournamentsId });
+                    table.PrimaryKey("PK_TournamentPlayer", x => new { x.PlayerId, x.TournamentId });
                     table.ForeignKey(
-                        name: "FK_TournamentPlayer_Players_PlayersId",
-                        column: x => x.PlayersId,
+                        name: "FK_TournamentPlayer_Players_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TournamentPlayer_Tournaments_TournamentsId",
-                        column: x => x.TournamentsId,
+                        name: "FK_TournamentPlayer_Tournaments_TournamentId",
+                        column: x => x.TournamentId,
                         principalTable: "Tournaments",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TournamentStaff",
+                name: "PlayerStats",
                 columns: table => new
                 {
-                    StaffId = table.Column<int>(type: "integer", nullable: false),
-                    TournamentsId = table.Column<int>(type: "integer", nullable: false)
+                    MapId = table.Column<int>(type: "integer", nullable: false),
+                    PlayerId = table.Column<int>(type: "integer", nullable: false),
+                    RoundId = table.Column<int>(type: "integer", nullable: false),
+                    MapMod = table.Column<string>(type: "text", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    Acc = table.Column<decimal>(type: "numeric", nullable: false),
+                    Mods = table.Column<List<string>>(type: "text[]", nullable: true),
+                    MatchId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TournamentStaff", x => new { x.StaffId, x.TournamentsId });
+                    table.PrimaryKey("PK_PlayerStats", x => new { x.MapId, x.PlayerId, x.RoundId });
                     table.ForeignKey(
-                        name: "FK_TournamentStaff_Staff_StaffId",
-                        column: x => x.StaffId,
-                        principalTable: "Staff",
+                        name: "FK_PlayerStats_Maps_MapId_MapMod",
+                        columns: x => new { x.MapId, x.MapMod },
+                        principalTable: "Maps",
+                        principalColumns: new[] { "Id", "Mod" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PlayerStats_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TournamentStaff_Tournaments_TournamentsId",
-                        column: x => x.TournamentsId,
-                        principalTable: "Tournaments",
+                        name: "FK_PlayerStats_Rounds_RoundId",
+                        column: x => x.RoundId,
+                        principalTable: "Rounds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QualsSchedules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoundId = table.Column<int>(type: "integer", nullable: false),
+                    DateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Names = table.Column<List<string>>(type: "text[]", nullable: true),
+                    Referee = table.Column<string>(type: "text", nullable: true),
+                    Num = table.Column<string>(type: "text", nullable: false),
+                    MatchId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_QualsSchedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_QualsSchedules_Rounds_RoundId",
+                        column: x => x.RoundId,
+                        principalTable: "Rounds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -271,34 +325,32 @@ namespace otmApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stats",
+                name: "Schedules",
                 columns: table => new
                 {
-                    MapId = table.Column<int>(type: "integer", nullable: false),
-                    PlayerId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Num = table.Column<int>(type: "integer", nullable: false),
                     RoundId = table.Column<int>(type: "integer", nullable: false),
-                    MapMod = table.Column<string>(type: "text", nullable: false),
-                    Score = table.Column<int>(type: "integer", nullable: false),
-                    Acc = table.Column<decimal>(type: "numeric", nullable: false),
-                    Mods = table.Column<List<string>>(type: "text[]", nullable: true)
+                    RoundNumber = table.Column<int>(type: "integer", nullable: false),
+                    DateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Referee = table.Column<string>(type: "text", nullable: true),
+                    Streamer = table.Column<string>(type: "text", nullable: true),
+                    Commentators = table.Column<List<string>>(type: "text[]", nullable: true),
+                    Name1 = table.Column<string>(type: "text", nullable: true),
+                    Name2 = table.Column<string>(type: "text", nullable: true),
+                    Score1 = table.Column<int>(type: "integer", nullable: true),
+                    Score2 = table.Column<int>(type: "integer", nullable: true),
+                    Winner = table.Column<string>(type: "text", nullable: true),
+                    Loser = table.Column<string>(type: "text", nullable: true),
+                    IsInLosersBracket = table.Column<bool>(type: "boolean", nullable: false),
+                    MpLinkId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stats", x => new { x.MapId, x.PlayerId, x.RoundId });
+                    table.PrimaryKey("PK_Schedules", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Stats_Maps_MapId_MapMod",
-                        columns: x => new { x.MapId, x.MapMod },
-                        principalTable: "Maps",
-                        principalColumns: new[] { "Id", "Mod" },
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stats_Players_PlayerId",
-                        column: x => x.PlayerId,
-                        principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Stats_Rounds_RoundId",
+                        name: "FK_Schedules_Rounds_RoundId",
                         column: x => x.RoundId,
                         principalTable: "Rounds",
                         principalColumn: "Id",
@@ -322,12 +374,68 @@ namespace otmApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeamPlayer_Team_TeamsId",
+                        name: "FK_TeamPlayer_Teams_TeamsId",
                         column: x => x.TeamsId,
-                        principalTable: "Team",
+                        principalTable: "Teams",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "TeamStats",
+                columns: table => new
+                {
+                    MapId = table.Column<int>(type: "integer", nullable: false),
+                    TeamId = table.Column<int>(type: "integer", nullable: false),
+                    RoundId = table.Column<int>(type: "integer", nullable: false),
+                    MapMod = table.Column<string>(type: "text", nullable: false),
+                    TotalScore = table.Column<int>(type: "integer", nullable: false),
+                    AvgScore = table.Column<int>(type: "integer", nullable: false),
+                    Acc = table.Column<decimal>(type: "numeric", nullable: false),
+                    MatchId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TeamStats", x => new { x.MapId, x.TeamId, x.RoundId });
+                    table.ForeignKey(
+                        name: "FK_TeamStats_Maps_MapId_MapMod",
+                        columns: x => new { x.MapId, x.MapMod },
+                        principalTable: "Maps",
+                        principalColumns: new[] { "Id", "Mod" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TeamStats_Rounds_RoundId",
+                        column: x => x.RoundId,
+                        principalTable: "Rounds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TeamStats_Teams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerStats_MapId_MapMod",
+                table: "PlayerStats",
+                columns: new[] { "MapId", "MapMod" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerStats_PlayerId",
+                table: "PlayerStats",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerStats_RoundId",
+                table: "PlayerStats",
+                column: "RoundId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_QualsSchedules_RoundId",
+                table: "QualsSchedules",
+                column: "RoundId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoundMap_MappoolId_MappoolMod",
@@ -345,23 +453,13 @@ namespace otmApi.Migrations
                 column: "TournamentId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Stats_MapId_MapMod",
-                table: "Stats",
-                columns: new[] { "MapId", "MapMod" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stats_PlayerId",
-                table: "Stats",
-                column: "PlayerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Stats_RoundId",
-                table: "Stats",
+                name: "IX_Schedules_RoundId",
+                table: "Schedules",
                 column: "RoundId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Team_TournamentId",
-                table: "Team",
+                name: "IX_Staff_TournamentId",
+                table: "Staff",
                 column: "TournamentId");
 
             migrationBuilder.CreateIndex(
@@ -370,14 +468,29 @@ namespace otmApi.Migrations
                 column: "TeamsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TournamentPlayer_TournamentsId",
-                table: "TournamentPlayer",
-                column: "TournamentsId");
+                name: "IX_TeamStats_MapId_MapMod",
+                table: "TeamStats",
+                columns: new[] { "MapId", "MapMod" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TournamentStaff_TournamentsId",
-                table: "TournamentStaff",
-                column: "TournamentsId");
+                name: "IX_TeamStats_RoundId",
+                table: "TeamStats",
+                column: "RoundId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TeamStats_TeamId",
+                table: "TeamStats",
+                column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Teams_TournamentId",
+                table: "Teams",
+                column: "TournamentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TournamentPlayer_TournamentId",
+                table: "TournamentPlayer",
+                column: "TournamentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tournaments_HostId",
@@ -389,22 +502,31 @@ namespace otmApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "PlayerStats");
+
+            migrationBuilder.DropTable(
+                name: "QualsSchedules");
+
+            migrationBuilder.DropTable(
                 name: "RoundMap");
 
             migrationBuilder.DropTable(
                 name: "RoundMapSuggestion");
 
             migrationBuilder.DropTable(
-                name: "Stats");
+                name: "Schedules");
+
+            migrationBuilder.DropTable(
+                name: "Staff");
 
             migrationBuilder.DropTable(
                 name: "TeamPlayer");
 
             migrationBuilder.DropTable(
-                name: "TournamentPlayer");
+                name: "TeamStats");
 
             migrationBuilder.DropTable(
-                name: "TournamentStaff");
+                name: "TournamentPlayer");
 
             migrationBuilder.DropTable(
                 name: "MapSuggestions");
@@ -416,13 +538,10 @@ namespace otmApi.Migrations
                 name: "Rounds");
 
             migrationBuilder.DropTable(
-                name: "Team");
+                name: "Teams");
 
             migrationBuilder.DropTable(
                 name: "Players");
-
-            migrationBuilder.DropTable(
-                name: "Staff");
 
             migrationBuilder.DropTable(
                 name: "Tournaments");
