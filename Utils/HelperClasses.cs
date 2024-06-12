@@ -174,3 +174,13 @@ public class Attributes
     public decimal Approach_rate { get; set; }
     public decimal Overall_difficulty { get; set; }
 }
+
+public class ChallongeTournamentResp
+{
+    public ChallongeTournament Tournament { get; set; } = null!;
+}
+
+public class ChallongeTournament
+{
+    public int Id { get; set; }
+}

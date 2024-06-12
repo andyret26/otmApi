@@ -215,4 +215,12 @@ public class TourneyService(DataContext db) : ITourneyService
         t.HowManyQualifies = howManyQualifies;
         await _db.SaveChangesAsync();
     }
+
+    public async Task AddChallongeIdAsync(int tournamentId, int challongeId)
+    {
+        var t = await _db.Tournaments.SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        t.ChallongeId = challongeId;
+        await _db.SaveChangesAsync();
+    }
 }

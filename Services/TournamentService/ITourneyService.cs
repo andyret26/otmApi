@@ -18,6 +18,8 @@ public interface ITourneyService
     /// <param name="hostId">Host to get tournaments from</param>
     /// <returns>List of tournaments created by the specified host</returns>
     public Task<List<Tournament>> GetAllByHostIdAsync(int hostId);
+
+    public Task AddChallongeIdAsync(int tournamentId, int challongeId);
     public Task<Tournament> AddTeamAsync(int tournamentId, Team team);
     public Task<Player> AddPlayerAsync(int tournamentId, Player player);
     public Task<Round> AddRoundAsync(int tournamentId, Round round);

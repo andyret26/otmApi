@@ -12,6 +12,7 @@ public class Tournament
     public int MaxTeamSize { get; set; }
     public string RankRange { get; set; } = null!;
     public string? HowManyQualifies { get; set; }
+    public int? ChallongeId { get; set; }
 
 
 

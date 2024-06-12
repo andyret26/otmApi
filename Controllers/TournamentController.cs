@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using OtmApi.Data.Dtos;
 using OtmApi.Data.Entities;
+using OtmApi.Services.Apis;
 using OtmApi.Services.HostService;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
@@ -26,7 +27,8 @@ public class TournamentController(
     IOsuApiService osuApiService,
     IPlayerService playerService,
     IStaffService staffService,
-    IHostService hostService
+    IHostService hostService,
+    IChallongeApiService challongeApiService
         ) : ControllerBase
 {
     private readonly IMapper _mapper = mapper;
@@ -35,6 +37,7 @@ public class TournamentController(
     private readonly IPlayerService _playerService = playerService;
     private readonly IStaffService _staffService = staffService;
     private readonly IHostService _hostService = hostService;
+    private readonly IChallongeApiService _challongeApiService = challongeApiService;
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<TournamentDto>))]
