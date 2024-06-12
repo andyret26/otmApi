@@ -227,6 +227,12 @@ public class ScheduleController(
             // var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
             // var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
             // if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+            var tournament = await _tourneyService.GetByIdSimpleAsync(tournamentId);
+            if (tournament.IsTeamTourney)
+            {
+                var resteams = await _scheduleService.GenerateScheduleTeamAsync(tournamentId, roundId, request.StartDate, request.EndDate);
+                return Ok(_mapper.Map<List<ScheduleDto>>(resteams));
+            }
             var res = await _scheduleService.GenerateScheduleAsync(tournamentId, roundId, request.StartDate, request.EndDate);
             return Ok(_mapper.Map<List<ScheduleDto>>(res));
         }

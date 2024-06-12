@@ -184,7 +184,7 @@ public class ScheduleService(DataContext db) : IScheduleService
                 }
                 else
                 {
-                    var winnerIndex = (previousRoundSchedules.Count / 2) + (i % (previousRoundSchedules.Count / 4));
+                    var winnerIndex = i < winnerBracketscheduleList.Count / 4 ? 13 + (i % 4) : 9 + (i % 4);
                     loserBracketscheduleList.Add(new Schedule
                     {
                         DateTime = Functions.RoundToNearestHour(Functions.GetRandomeDate(startDate, endDate)),
@@ -217,8 +217,6 @@ public class ScheduleService(DataContext db) : IScheduleService
                     }
                 }
             }
-
-
         }
 
         return await _db.Schedules.Where(s => s.RoundId == RoundId).ToListAsync();
@@ -229,11 +227,11 @@ public class ScheduleService(DataContext db) : IScheduleService
         var round = await _db.Rounds.SingleOrDefaultAsync(r => r.Id == RoundId);
         if (round == null) throw new NotFoundException("Round", RoundId);
 
-        var isFirstBracket = !await _db.Teams.AnyAsync(tt => tt.TournamentId == tournamentId && tt.IsKnockedDown == true);
+        var isFirstBracket = !await _db.Teams.AnyAsync(tp => tp.TournamentId == tournamentId && tp.IsKnockedDown == true);
 
         if (isFirstBracket)
         {
-            var teams = await _db.Teams.Where(tt => tt.TournamentId == tournamentId && tt.Isknockout == false && tt.Seed != null).Include(tt => tt.TeamName).OrderBy(tt => tt.Seed).ToListAsync();
+            var teams = await _db.Teams.Where(tp => tp.TournamentId == tournamentId && tp.Isknockout == false && tp.Seed != null).OrderBy(tp => tp.Seed).ToListAsync();
             List<Schedule> scheduleList = [];
             for (int i = 0; i < teams.Count / 2; i++)
             {
@@ -245,15 +243,94 @@ public class ScheduleService(DataContext db) : IScheduleService
                     Round = round,
                     RoundNumber = 1,
                     Name1 = teams[i].TeamName,
-                    Name2 = teams[teams.Count - i - 1].TeamName
-                });
+                    Name2 = teams[^(i + 1)].TeamName
 
+                });
             }
             await _db.Schedules.AddRangeAsync(scheduleList);
             await _db.SaveChangesAsync();
-
-
         }
-        throw new NotImplementedException();
+        else
+        {
+            var tournament = await _db.Tournaments.Include(t => t.Rounds).SingleOrDefaultAsync(t => t.Id == tournamentId);
+            if (tournament == null) throw new NotFoundException("Tournament", tournamentId);
+            var currentRoundIndex = tournament.Rounds!.FindIndex(r => r.Id == RoundId);
+            if (currentRoundIndex == -1) throw new NotFoundException("Round", RoundId);
+            var previousRoundId = tournament.Rounds[currentRoundIndex - 1].Id;
+
+            var previousRoundSchedules = await _db.Schedules.Where(s => s.RoundId == previousRoundId).ToListAsync();
+
+            List<Schedule> winnerBracketscheduleList = [];
+            List<Schedule> loserBracketscheduleList = [];
+            for (var i = 0; i < (previousRoundSchedules.Where(prs => prs.IsInLosersBracket == false).Count() / 2); i++)
+            {
+                winnerBracketscheduleList.Add(new Schedule
+                {
+                    DateTime = Functions.RoundToNearestHour(Functions.GetRandomeDate(startDate, endDate)),
+                    Num = i + 1,
+                    RoundId = RoundId,
+                    Round = round,
+                    RoundNumber = previousRoundSchedules[0].RoundNumber + 1,
+                    Name1 = previousRoundSchedules[i].Winner,
+                    Name2 = previousRoundSchedules[^(i + 1)].Winner
+
+                });
+
+            }
+            // Loosers Bracket
+            for (var i = 0; i < previousRoundSchedules.Count / 2; i++)
+            {
+                if (previousRoundSchedules[0].RoundNumber + 1 == 2)
+                {
+                    loserBracketscheduleList.Add(new Schedule
+                    {
+                        DateTime = Functions.RoundToNearestHour(Functions.GetRandomeDate(startDate, endDate)),
+                        Num = winnerBracketscheduleList.Count + 1 + i,
+                        RoundId = RoundId,
+                        Round = round,
+                        RoundNumber = 2,
+                        Name1 = previousRoundSchedules[0].Loser,
+                        Name2 = previousRoundSchedules[^(i + 1)].Loser,
+                        IsInLosersBracket = true
+                    });
+                }
+                else
+                {
+                    var winnerIndex = i < winnerBracketscheduleList.Count / 4 ? 13 + (i % 4) : 9 + (i % 4);
+                    loserBracketscheduleList.Add(new Schedule
+                    {
+                        DateTime = Functions.RoundToNearestHour(Functions.GetRandomeDate(startDate, endDate)),
+                        Num = winnerBracketscheduleList.Count + 1 + i,
+                        RoundId = RoundId,
+                        Round = round,
+                        RoundNumber = previousRoundSchedules[0].RoundNumber + 1,
+                        Name1 = previousRoundSchedules[i].Loser,
+                        Name2 = previousRoundSchedules[winnerIndex].Winner,
+
+                        IsInLosersBracket = true
+                    });
+
+                    var c = loserBracketscheduleList.Count;
+                    for (int j = 0; j < c / 2; j++)
+                    {
+                        loserBracketscheduleList.Add(new Schedule
+                        {
+                            DateTime = new DateTime(2000, 01, 01),
+                            Num = winnerBracketscheduleList.Count + 1 + i,
+                            RoundId = RoundId,
+                            Round = round,
+                            RoundNumber = previousRoundSchedules[0].RoundNumber + 1,
+                            Name1 = previousRoundSchedules[j].Winner,
+                            Name2 = previousRoundSchedules[^(j + 1)].Winner,
+
+                            IsInLosersBracket = true
+                        });
+
+                    }
+                }
+            }
+        }
+
+        return await _db.Schedules.Where(s => s.RoundId == RoundId).ToListAsync();
     }
 }
