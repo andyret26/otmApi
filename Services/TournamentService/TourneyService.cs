@@ -137,6 +137,13 @@ public class TourneyService(DataContext db) : ITourneyService
         return t.Players!.Select(tp => tp.Player).OrderBy(p => p.Username).ToList();
     }
 
+    public async Task<List<TournamentPlayer>> GetAllTournamentPlayersAsync(int tournamentId)
+    {
+        var t = await _db.Tournaments.Include(t => t.Players)!.ThenInclude(tp => tp.Player).SingleOrDefaultAsync(t => t.Id == tournamentId);
+        if (t == null) throw new NotFoundException("Tournament", tournamentId);
+        return t.Players!.OrderBy(tp => tp.Player.Username).ToList();
+    }
+
     public async Task<List<Team>> GetAllTeamsAsync(int tournamentId)
     {
         var t = await _db.Tournaments.Include(t => t.Teams).SingleOrDefaultAsync(t => t.Id == tournamentId);

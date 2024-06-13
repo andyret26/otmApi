@@ -41,6 +41,7 @@ public interface ITourneyService
     /// <returns></returns>
     public Task<bool> StaffsInTourneyAsync(int tournamentId, int staffId);
     public Task<List<Player>> GetAllPlayersAsync(int tournamentId);
+    public Task<List<TournamentPlayer>> GetAllTournamentPlayersAsync(int tournamentId);
     public Task<List<Team>> GetAllTeamsAsync(int tournamentId);
     public Task<List<Staff>> GetAllStaffsAsync(int tournamentId);
     public Task<bool> IsTeamTourneyAsync(int tournamentId);
