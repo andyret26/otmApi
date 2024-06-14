@@ -226,7 +226,8 @@ public class TournamentController(
         var round = new Round
         {
             Name = roundPostDto.Name,
-            IsQualifier = roundPostDto.IsQualifier
+            IsQualifier = roundPostDto.IsQualifier,
+            RoundNumber = roundPostDto.RoundNumber
         };
 
         var addedRound = await _tourneyService.AddRoundAsync(tournamentId, round);
@@ -327,6 +328,8 @@ public class TournamentController(
 
     [HttpPost("{tournamentId}/set-seed")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [EnableRateLimiting("fixed")]
     public async Task<ActionResult> SetSeed(int tournamentId, [FromBody] SetSeedReq req)
     {
         try
@@ -344,7 +347,9 @@ public class TournamentController(
                 await _tourneyService.SetPlayerSeedsAsync(tournamentId, req.PlayerSeeds!);
             }
             await _tourneyService.SetHowManyQualifiesAsync(tournamentId, req.HowManyQualifies);
-            return Ok();
+            await _challongeApiService.CreateTournamentAsync(tournamentId);
+            await _challongeApiService.AddParticipantsBulkAsync(tournamentId);
+            return NoContent();
         }
         catch (NotFoundException e)
         {

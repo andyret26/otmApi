@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.MapService;
 using OtmApi.Services.RoundService;
+using OtmApi.Services.Apis;
 
 namespace OtmApi.Controllers;
 
@@ -26,7 +27,8 @@ public class ScheduleController(
     ITourneyService tourneyService,
     IOsuApiService osuApiService,
     IMapService mapService,
-    IRoundService roundService
+    IRoundService roundService,
+    IChallongeApiService challongeApiService
     ) : ControllerBase
 {
     private readonly IScheduleService _scheduleService = scheduleService;
@@ -37,6 +39,7 @@ public class ScheduleController(
     private readonly IOsuApiService _osuApiService = osuApiService;
     private readonly IMapService _mapService = mapService;
     private readonly IRoundService _roundService = roundService;
+    private readonly IChallongeApiService _challongeApiService = challongeApiService;
 
     [HttpPost("generate-qualifier")]
     [Authorize]
@@ -216,7 +219,7 @@ public class ScheduleController(
     //TODO
 
     [HttpPost("tournament/{tournamentId}/round/{roundId}/generate-schedule")]
-    // [Authorize]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ScheduleDto>))]
 
     public async Task<ActionResult<List<ScheduleDto>>>
@@ -224,9 +227,13 @@ public class ScheduleController(
     {
         try
         {
-            // var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
-            // var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
-            // if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+            var tokenSub = User.FindFirst(ClaimTypes.NameIdentifier);
+            var (isAuth, msg) = await Auth.IsAuthorized(tokenSub, _staffService, _tourneyService, tournamentId, ["admin", "host"]);
+            if (!isAuth) return Unauthorized(new ErrorResponse("Unauthorized", 401, msg));
+
+            // TODO: Change this, Get matches from Challonge, give players challonge id (might need to do this when Challonge tournament gets created),
+            // and creat schedules from that
+
             var tournament = await _tourneyService.GetByIdSimpleAsync(tournamentId);
             if (tournament.IsTeamTourney)
             {
@@ -239,6 +246,20 @@ public class ScheduleController(
         catch (AlreadyExistException e)
         {
             return Conflict(new ErrorResponse("Conflict", 409, e.Message));
+        }
+    }
+
+    [HttpGet("tournament/{tournamentId}/round/{roundNum}/matches")]
+    public async Task<ActionResult> GetRoundMatchesAsync(int tournamentId, int roundNum)
+    {
+        try
+        {
+            await _challongeApiService.GetRoundMatchesAsync(tournamentId, roundNum);
+            return Ok();
+        }
+        catch (NotFoundException e)
+        {
+            return NotFound(new ErrorResponse("Not Found", 404, e.Message));
         }
     }
 

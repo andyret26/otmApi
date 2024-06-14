@@ -15,6 +15,7 @@ public class Round
     public Tournament Tournament { get; set; } = null!;
     public bool IsMpLinksPublic { get; set; } = false;
     public bool IsStatsPublic { get; set; } = false;
+    public int RoundNumber { get; set; }
 }
 
 public class TMap

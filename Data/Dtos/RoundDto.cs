@@ -8,12 +8,14 @@ public class RoundDto
     public bool IsMpLinksPublic { get; set; }
     public bool IsStatsPublic { get; set; }
     public int TournamentId { get; set; }
+    public int RoundNumber { get; set; }
 }
 
 public class RoundPostDto
 {
     public string Name { get; set; } = null!;
     public bool IsQualifier { get; set; }
+    public int RoundNumber { get; set; }
 }
 
 

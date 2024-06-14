@@ -13,13 +13,14 @@ public class ChallongeApiService(ITourneyService tourneyService) : IChallongeApi
     private readonly string BASE_URL = "https://api.challonge.com/v1";
     private readonly ITourneyService _tourneyService = tourneyService;
 
-    public async Task CreateTournamentAsync(int tournamentId, string tournamentName)
+    public async Task CreateTournamentAsync(int tournamentId)
     {
         if (API_KEY == null) throw new Exception("CHALLONGE_API_KEY environment variable not set");
+        var t = await _tourneyService.GetByIdSimpleAsync(tournamentId);
 
         var http = new HttpClient();
 
-        var parameters = $"?api_key={API_KEY}&tournament[name]={tournamentName}&tournament[tournament_type]=double%20elimination";
+        var parameters = $"?api_key={API_KEY}&tournament[name]={t.Name}&tournament[tournament_type]=double%20elimination";
 
         var fullUrl = BASE_URL + "/tournaments.json" + parameters;
 
@@ -85,7 +86,9 @@ public class ChallongeApiService(ITourneyService tourneyService) : IChallongeApi
 
         if (resp.IsSuccessStatusCode)
         {
-
+            var http2 = new HttpClient();
+            var startPath = BASE_URL + $"/tournaments/{t.ChallongeId}/start.json?api_key={API_KEY}";
+            await http2.PostAsync(startPath, null);
             return;
         }
         else
@@ -93,7 +96,24 @@ public class ChallongeApiService(ITourneyService tourneyService) : IChallongeApi
             System.Console.WriteLine(await resp.Content.ReadAsStringAsync());
             throw new Exception("Failed to add participants to challonge");
         }
+    }
 
+    public async Task GetRoundMatchesAsync(int tournamentId, int roundNum)
+    {
+        var t = await _tourneyService.GetByIdSimpleAsync(tournamentId);
+        var fullUrl = BASE_URL + $"/tournaments/{t.ChallongeId}/matches.json?api_key={API_KEY}";
 
+        var http = new HttpClient();
+        var resp = await http.GetAsync(fullUrl);
+        if (resp.IsSuccessStatusCode)
+        {
+            var resString = await resp.Content.ReadAsStringAsync();
+            System.Console.WriteLine(resString);
+            return;
+        }
+        else
+        {
+            throw new Exception("Failed to get round matches from challonge");
+        }
     }
 }
