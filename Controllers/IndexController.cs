@@ -19,6 +19,6 @@ public class IndexController(IHostService hostService) : ControllerBase
     public async Task<IActionResult> Ping()
     {
         await _hostService.GetByIdAsync(3191010);
-        return Ok();
+        return Ok("Pong");
     }
 }
