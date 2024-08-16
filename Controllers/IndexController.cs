@@ -15,7 +15,7 @@ public class IndexController(IHostService hostService) : ControllerBase
         return Ok("Welcome to the OtmApi!");
     }
 
-    [HttpGet]
+    [HttpGet("ping")]
     public async Task<IActionResult> Ping()
     {
         await _hostService.GetByIdAsync(3191010);
