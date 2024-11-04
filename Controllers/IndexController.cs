@@ -32,6 +32,6 @@ public class IndexController(IHostService hostService, RabbitMQPublisher rmq, ID
     [ProducesResponseType(200)]
     public async Task<IActionResult> PingDiscord(){
         await _disc.SendMessage($"pinged from OTM server");
-        return Ok();
+        return Ok("Pinged discord OK");
     }
 }
