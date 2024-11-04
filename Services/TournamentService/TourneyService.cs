@@ -37,6 +37,7 @@ public class TourneyService(DataContext db) : ITourneyService
             .Include(t => t.Players!).ThenInclude(p => p.Player)
             .Include(t => t.Rounds)
             .Include(t => t.Staff)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(t => t.Id == id);
         if (t == null) throw new NotFoundException("Tournament", id);
         return t;

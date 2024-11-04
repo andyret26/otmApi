@@ -1,16 +1,20 @@
-using System.Reflection;
+using Discord;
+using Discord.WebSocket;
 using dotenv.net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Otm.Services.RabbitMQ;
 using OtmApi.Data;
 using OtmApi.Services.Apis;
+using OtmApi.Services.Discord;
 using OtmApi.Services.HostService;
 using OtmApi.Services.MapService;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
+using OtmApi.Services.RabbitMQ;
 using OtmApi.Services.RoundService;
 using OtmApi.Services.ScheduleService;
 using OtmApi.Services.StaffService;
@@ -18,6 +22,8 @@ using OtmApi.Services.TournamentService;
 
 DotEnv.Load();
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<IDiscordService, DiscordService>();
+builder.Services.AddSingleton(new DiscordSocketClient());
 builder.Services.AddCors();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -31,6 +37,8 @@ builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddSingleton<RabbitMQPublisher>();
+
 
 builder.Services.AddRateLimiter(_ => _
     .AddFixedWindowLimiter(policyName: "fixed", options =>
@@ -94,14 +102,28 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     var con = Environment.GetEnvironmentVariable("DB_STRING");
     if (con == null) System.Console.WriteLine("No connection string found");
-    options.UseNpgsql(con);
+    options.UseNpgsql(con, options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
+});
+
+
+builder.Services.AddSingleton<RabbitMQService>(sp =>
+{
+    string hostname = Environment.GetEnvironmentVariable("RMQ_HOSTNAME") ?? throw new Exception("RabbitMQ hostName not in ENV");
+    string userName = Environment.GetEnvironmentVariable("RMQ_USERNAME") ?? throw new Exception("RabbitMQ userName not in ENV");
+    string password = Environment.GetEnvironmentVariable("RMQ_PASSWORD") ?? throw new Exception("RabbitMQ password not in ENV");
+
+    return new RabbitMQService(hostname, userName, password);
 });
 
 
 
 
-
 var app = builder.Build();
+var discordClient = app.Services.GetService<DiscordSocketClient>();
+discordClient!.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN")).GetAwaiter().GetResult();
+discordClient.StartAsync().GetAwaiter().GetResult();
+
+
 app.UseCors(builder =>
 {
     builder.WithOrigins("http://localhost:5173", "https://osu-tm.vercel.app", "https://ot-timer.azurewebsites.net")
@@ -120,7 +142,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseRateLimiter();
-app.Run("http://::80");
+app.Services.GetRequiredService<RabbitMQService>();
+if (app.Environment.IsDevelopment()) app.Run();
+else app.Run("http://::80");
+
 
 
 static async Task<SecurityKey[]> FetchJwksAsync(string jwksUri)

@@ -92,7 +92,7 @@ public class RoundController(
                 }
 
 
-                if (mapSuggestion.Mod[..2] != request.Mod[..2] && (request.Mod[..2] == "DT" || request.Mod[..2] == "HR"))
+                if (mapSuggestion.Mod == null && (request.Mod[..2] == "DT" || request.Mod[..2] == "HR"))
                 {
                     var attributes = await _osuApiService.GetBeatmapAttributesAsync(mapSuggestion.Id, request.Mod[..2]);
                     AttributeCalculate(mapSuggestion, attributes, request.Mod);
