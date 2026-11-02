@@ -33,7 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_3FF0CE6F44784CBA8143AD33E43AB809 }}/andy26/otm-api:${{ github.sha }}
+          tags: index.docker.io/andy26/otm-api:${{ github.sha }}
           file: ./Dockerfile
 
   deploy:
@@ -49,5 +49,5 @@ jobs:
         with:
           app-name: 'osu-tm-api'
           slot-name: 'Production'
-          images: 'index.docker.io/${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_3FF0CE6F44784CBA8143AD33E43AB809 }}/andy26/otm-api:${{ github.sha }}'
+          images: 'index.docker.io/andy26/otm-api:${{ github.sha }}'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C8CA39FE46654FE4ADAB9A37DCA7CCCE }}
