@@ -1,32 +1,26 @@
-using RabbitMQ.Client;
+// using RabbitMQ.Client;
 
-namespace OtmApi.Services.RabbitMQ;
+// namespace OtmApi.Services.RabbitMQ;
 
-public class RabbitMQService : IDisposable
-{
-  private readonly IConnection _connection;
-  private readonly IModel _channel;
+// public class RabbitMQService : IDisposable
+// {
+//   private readonly IConnection _connection;
+//   private readonly IChannel _channel;
 
-  public RabbitMQService(string hostName, string userName, string password)
-  {
-    var factory = new ConnectionFactory()
-    {
-      HostName = hostName,
-      UserName = userName,
-      Password = password,
-      Port=5672,
-      VirtualHost = userName
-    };
+//   public async Task<RabbitMQService> InitializeAsync(string hostName, string userName, string password)
+//   {
+//     var factory = new ConnectionFactory { HostName = hostName};
+//     var connection = await factory.CreateConnectionAsync();
+//     var channel = await connection.CreateChannelAsync();
 
-    _connection = factory.CreateConnection();
-    _channel = _connection.CreateModel();
-  }
+//     return channel
+//   }
 
-  public IModel GetChannel() => _channel;
+//   public IChannel GetChannel() => _channel;
 
-    public void Dispose()
-    {
-        _channel?.Close();
-        _connection?.Close();
-    }
-}
+//     public void Dispose()
+//     {
+//         _channel?.Close();
+//         _connection?.CloseAsync();
+//     }
+// }

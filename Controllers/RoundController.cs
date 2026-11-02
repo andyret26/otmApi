@@ -85,7 +85,7 @@ public class RoundController(
                 else
                 {
                     var map = await _osuApiService.GetBeatmapsAsync([request.MapId]);
-                    if (map.IsNullOrEmpty()) return NotFound(new ErrorResponse("NotFound", 404, "Map not found"));
+                    if (map.Count == 0) return NotFound(new ErrorResponse("NotFound", 404, "Map not found"));
 
                     mapSuggestion = _mapper.Map<TMapSuggestion>(map[0]);
 

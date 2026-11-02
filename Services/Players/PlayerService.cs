@@ -30,8 +30,9 @@ public class PlayerService : IPlayerService
             var players = _db.Players.ToList();
             return players;
         }
-        catch (SqlException)
+        catch (DbUpdateException err)
         {
+            Console.WriteLine(err.Message);
             throw;
         }
     }
@@ -43,7 +44,7 @@ public class PlayerService : IPlayerService
             var player = await _db.Players.Include(p => p.Tournaments).SingleOrDefaultAsync((p) => p.Id == id);
             return player;
         }
-        catch (SqlException err)
+        catch (DbUpdateException err)
         {
             Console.WriteLine(err.Message);
             throw;
@@ -57,7 +58,7 @@ public class PlayerService : IPlayerService
             var players = await _db.Players.Where((p) => ids.Contains(p.Id)).ToListAsync();
             return players;
         }
-        catch (SqlException err)
+        catch (DbUpdateException err)
         {
             Console.WriteLine(err.Message);
             throw;
@@ -73,7 +74,7 @@ public class PlayerService : IPlayerService
 
             return addedPlayer.Entity;
         }
-        catch (SqlException err)
+        catch (DbUpdateException err)
         {
             Console.WriteLine(err.Message);
             throw;
@@ -93,7 +94,7 @@ public class PlayerService : IPlayerService
             var player = _db.Players.SingleOrDefault((p) => p.Id == id);
             return player != null;
         }
-        catch (SqlException err)
+        catch (DbUpdateException err)
         {
             Console.WriteLine(err.Message);
             throw;
@@ -112,7 +113,7 @@ public class PlayerService : IPlayerService
             }).ToList();
             return players;
         }
-        catch (SqlException err)
+        catch (DbUpdateException err)
         {
             Console.WriteLine(err.Message);
             throw;

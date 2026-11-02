@@ -115,7 +115,7 @@ public class TournamentController(
 
     public async Task<ActionResult> RegisterTeam(int tournamentId, RegistrationDto regsDto)
     {
-        if (regsDto.TeamName.IsNullOrEmpty()) return BadRequest(new ErrorResponse("Bad Request", 400, "Team name is required"));
+        if (string.IsNullOrEmpty(regsDto.TeamName)) return BadRequest(new ErrorResponse("Bad Request", 400, "Team name is required"));
         if (await _tourneyService.TeamNameExistsInTournamentAsync(tournamentId, regsDto.TeamName)) return Conflict(new ErrorResponse("Conflict", 409, "Team with that name already exists in this tournament"));
 
         var playersThatHasTeam = await _tourneyService.PlayerExistsInTeamTournamentAsync(tournamentId, regsDto.Players.Select(p => p.OsuUserId).ToList());

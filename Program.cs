@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Otm.Services.RabbitMQ;
+using Microsoft.OpenApi;
 using OtmApi.Data;
 using OtmApi.Services.Apis;
 using OtmApi.Services.Discord;
@@ -14,7 +13,6 @@ using OtmApi.Services.HostService;
 using OtmApi.Services.MapService;
 using OtmApi.Services.OsuApi;
 using OtmApi.Services.Players;
-using OtmApi.Services.RabbitMQ;
 using OtmApi.Services.RoundService;
 using OtmApi.Services.ScheduleService;
 using OtmApi.Services.StaffService;
@@ -27,7 +25,7 @@ builder.Services.AddSingleton(new DiscordSocketClient());
 builder.Services.AddCors();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(cfg => {}, typeof(Program).Assembly);
 builder.Services.AddScoped<ITourneyService, TourneyService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IOsuApiService, OsuApiService>();
@@ -37,7 +35,6 @@ builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
-builder.Services.AddSingleton<RabbitMQPublisher>();
 
 
 builder.Services.AddRateLimiter(_ => _
@@ -61,16 +58,12 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.Http,
         Scheme = "bearer", // The name of the HTTP Authorization scheme to be used in the Swagger UI
         BearerFormat = "JWT", // JWT format
-        Reference = new OpenApiReference
-        {
-            Type = ReferenceType.SecurityScheme,
-            Id = "Bearer"
-        }
+
     };
     c.AddSecurityDefinition("Bearer", securityScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(documnet => new OpenApiSecurityRequirement
     {
-        { securityScheme, new List<string>() }
+       [new OpenApiSecuritySchemeReference ("Bearer", documnet)] = []
     });
 });
 
@@ -105,19 +98,6 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseNpgsql(con, options => options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
 });
 
-
-builder.Services.AddSingleton<RabbitMQService>(sp =>
-{
-    string hostname = Environment.GetEnvironmentVariable("RMQ_HOSTNAME") ?? throw new Exception("RabbitMQ hostName not in ENV");
-    string userName = Environment.GetEnvironmentVariable("RMQ_USERNAME") ?? throw new Exception("RabbitMQ userName not in ENV");
-    string password = Environment.GetEnvironmentVariable("RMQ_PASSWORD") ?? throw new Exception("RabbitMQ password not in ENV");
-
-    return new RabbitMQService(hostname, userName, password);
-});
-
-
-
-
 var app = builder.Build();
 var discordClient = app.Services.GetService<DiscordSocketClient>();
 discordClient!.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_BOT_TOKEN")).GetAwaiter().GetResult();
@@ -142,7 +122,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.UseRateLimiter();
-app.Services.GetRequiredService<RabbitMQService>();
 if (app.Environment.IsDevelopment()) app.Run();
 else app.Run("http://::80");
 
