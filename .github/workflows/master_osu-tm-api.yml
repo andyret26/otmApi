@@ -19,17 +19,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Log in to container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
-          registry: index.docker.io/
+          registry: index.docker.io
           username: ${{ secrets.AZUREAPPSERVICE_CONTAINERUSERNAME_7A810E775F944FE2A176C68FEE66FF99 }}
           password: ${{ secrets.AZUREAPPSERVICE_CONTAINERPASSWORD_9299226338AD4BC0948BDCEA97D210E2 }}
 
       - name: Build and push container image to registry
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -45,7 +45,7 @@ jobs:
       
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'osu-tm-api'
           slot-name: 'Production'
