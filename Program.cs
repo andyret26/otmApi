@@ -25,7 +25,6 @@ builder.Services.AddSingleton(new DiscordSocketClient());
 builder.Services.AddCors();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddAutoMapper(cfg => {}, typeof(Program).Assembly);
 builder.Services.AddScoped<ITourneyService, TourneyService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IOsuApiService, OsuApiService>();
@@ -35,6 +34,12 @@ builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddScoped<IMapService, MapService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
+
+// Add AutoMapper service
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.LicenseKey = Environment.GetEnvironmentVariable("AUTOMAPPER_LICENCE_KEY");
+},AppDomain.CurrentDomain.GetAssemblies());
 
 
 builder.Services.AddRateLimiter(_ => _
